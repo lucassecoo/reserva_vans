@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reserva de Van - Sistema de Agendamento</title>
+    <link rel="stylesheet" href="output.css" />
+    <link rel="stylesheet" href="van_booking_css.css" />
+  </head>
+  <body class="bg-gray-50 min-h-screen py-4 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div id="pageHeader" class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex items-center gap-6 header-inner">
+          <div class="flex-1 header-text">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
+              Reserva de Vans
+            </h1>
+            <p class="text-gray-600 mt-2">
+              Preencha os dados para solicitar sua viagem
+            </p>
+          </div>
+          <img
+            src="./media/logo_acciari_65.png"
+            alt="Logo acciari turismo"
+            class="h-12 w-auto object-contain header-logo"
+          />
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-sm font-medium text-gray-700"
+            >Etapa <span id="currentStep">1</span> de 4</span
+          >
+          <span class="text-sm text-gray-500" id="stepTitle"
+            >Informações do contratante</span
+          >
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div
+            id="progressBar"
+            class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+            style="width: 25%"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Form Container -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <form id="bookingForm" novalidate>
+          <!-- STEP 1: Dados do Contratante -->
+          <div id="step1" class="step-content">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">
+              Informações do contratante
+            </h2>
+
+            <div class="space-y-5">
+              <div>
+                <label
+                  for="motivacao"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Motivação da viagem *</label
+                >
+                <select
+                  id="motivacao"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Aeroporto">Aeroporto</option>
+                  <option value="Passeio">Passeio</option>
+                  <option value="Evento">Evento</option>
+                  <option value="Excursão">Excursão</option>
+                  <option value="Transporte corporativo">
+                    Transporte corporativo
+                  </option>
+                  <option value="Outro">Outro</option>
+                </select>
+                <span class="error-message" id="error-motivacao"></span>
+              </div>
+
+              <div id="motivacaoOutroContainer" class="hidden">
+                <label
+                  for="motivacaoOutro"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Especifique a motivação *</label
+                >
+                <input
+                  type="text"
+                  id="motivacaoOutro"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Digite a motivação"
+                />
+                <span class="error-message" id="error-motivacaoOutro"></span>
+              </div>
+
+              <div>
+                <label class="flex items-center gap-3">
+                  <input type="checkbox" id="isPJ" class="h-4 w-4" />
+                  <span class="text-sm font-medium text-gray-700"
+                    >Contratante é Pessoa Jurídica (PJ)</span
+                  >
+                </label>
+              </div>
+
+              <div id="pfFields">
+                <label
+                  for="nomeContratante"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Nome completo *</label
+                >
+                <input
+                  type="text"
+                  id="nomeContratante"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Digite o nome completo"
+                />
+                <span class="error-message" id="error-nomeContratante"></span>
+              </div>
+
+              <div id="pjFields" class="hidden">
+                <label
+                  for="razaoSocial"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Razão social *</label
+                >
+                <input
+                  type="text"
+                  id="razaoSocial"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Digite a razão social"
+                />
+                <span class="error-message" id="error-razaoSocial"></span>
+
+                <div>
+                  <label
+                    for="cnpj"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >CNPJ</label
+                  >
+                  <input
+                    type="text"
+                    id="cnpj"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="00.000.000/0000-00"
+                  />
+                  <span class="error-message" id="error-cnpj"></span>
+                </div>
+              </div>
+
+              <div id="pfRgGroup" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    for="rgContratante"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >RG *</label
+                  >
+                  <input
+                    type="text"
+                    id="rgContratante"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="00.000.000-0"
+                  />
+                  <span class="error-message" id="error-rgContratante"></span>
+                </div>
+                <div>
+                  <label
+                    for="orgaoExpedidor"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Órgão expedidor *</label
+                  >
+                  <input
+                    type="text"
+                    id="orgaoExpedidor"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="SSP, DETRAN, etc"
+                  />
+                  <span class="error-message" id="error-orgaoExpedidor"></span>
+                </div>
+                <div>
+                  <label
+                    for="cpf"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >CPF</label
+                  >
+                  <input
+                    type="text"
+                    id="cpf"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="000.000.000-00"
+                  />
+                  <span class="error-message" id="error-cpf"></span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label
+                    for="telefoneDdd"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >DDD *</label
+                  >
+                  <input
+                    type="tel"
+                    id="telefoneDdd"
+                    maxlength="2"
+                    class="w-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+                    placeholder="00"
+                  />
+                  <span class="error-message" id="error-telefoneDdd"></span>
+                </div>
+                <div class="sm:col-span-2">
+                  <label
+                    for="telefoneContratante"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Telefone (sem DDD) *</label
+                  >
+                  <input
+                    type="tel"
+                    id="telefoneContratante"
+                    maxlength="9"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="00000-0000"
+                  />
+                  <span
+                    class="error-message"
+                    id="error-telefoneContratante"
+                  ></span>
+                </div>
+              </div>
+
+              <div id="inscricaoEstadualContainer" class="hidden">
+                <label
+                  for="inscricaoEstadual"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Inscrição estadual *</label
+                >
+                <input
+                  type="text"
+                  id="inscricaoEstadual"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="000.000.000.000"
+                />
+                <span class="error-message" id="error-inscricaoEstadual"></span>
+              </div>
+
+              <div class="border-t pt-5 mt-5">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Endereço do contratante
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  <div class="sm:col-span-2">
+                    <label
+                      for="cepContratante"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >CEP *</label
+                    >
+                    <input
+                      type="text"
+                      id="cepContratante"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="00000-000"
+                    />
+                    <span
+                      class="error-message"
+                      id="error-cepContratante"
+                    ></span>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >&nbsp;</label
+                    >
+                    <button
+                      type="button"
+                      id="buscarCepContratante"
+                      class="w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-3"
+                    >
+                      <span id="buscarCepContratante-text">Buscar CEP</span>
+                      <span
+                        id="buscarCepContratante-spinner"
+                        class="spinner spinner-sm hidden"
+                      ></span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-4">
+                  <div>
+                    <label
+                      for="ruaContratante"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Rua *</label
+                    >
+                    <input
+                      type="text"
+                      id="ruaContratante"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nome da rua"
+                    />
+                    <span
+                      class="error-message"
+                      id="error-ruaContratante"
+                    ></span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="numeroContratante"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Número *</label
+                      >
+                      <input
+                        type="text"
+                        id="numeroContratante"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="000"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-numeroContratante"
+                      ></span>
+                    </div>
+                    <div>
+                      <label
+                        for="complementoContratante"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Complemento</label
+                      >
+                      <input
+                        type="text"
+                        id="complementoContratante"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Apto, sala, etc"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      for="bairroContratante"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Bairro *</label
+                    >
+                    <input
+                      type="text"
+                      id="bairroContratante"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nome do bairro"
+                    />
+                    <span
+                      class="error-message"
+                      id="error-bairroContratante"
+                    ></span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="cidadeContratante"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Cidade *</label
+                      >
+                      <input
+                        type="text"
+                        id="cidadeContratante"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Nome da cidade"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-cidadeContratante"
+                      ></span>
+                    </div>
+                    <div>
+                      <label
+                        for="estadoContratante"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Estado (UF) *</label
+                      >
+                      <input
+                        type="text"
+                        id="estadoContratante"
+                        maxlength="2"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="SP"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-estadoContratante"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Itinerário -->
+          <div id="step2" class="step-content hidden">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">
+              Detalhes do itinerário
+            </h2>
+
+            <div class="space-y-6">
+              <!-- Origem -->
+              <div class="bg-blue-50 p-5 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  📍 Origem (Saída)
+                </h3>
+
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                      <label
+                        for="cepSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >CEP *</label
+                      >
+                      <input
+                        type="text"
+                        id="cepSaida"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="00000-000"
+                      />
+                      <span class="error-message" id="error-cepSaida"></span>
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >&nbsp;</label
+                      >
+                      <button
+                        type="button"
+                        id="buscarCepSaida"
+                        class="w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-3"
+                      >
+                        <span id="buscarCepSaida-text">Buscar</span>
+                        <span
+                          id="buscarCepSaida-spinner"
+                          class="spinner spinner-sm hidden"
+                        ></span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      for="ruaSaida"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Rua *</label
+                    >
+                    <input
+                      type="text"
+                      id="ruaSaida"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span class="error-message" id="error-ruaSaida"></span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="numeroSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Número *</label
+                      >
+                      <input
+                        type="text"
+                        id="numeroSaida"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span class="error-message" id="error-numeroSaida"></span>
+                    </div>
+                    <div>
+                      <label
+                        for="complementoSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Complemento</label
+                      >
+                      <input
+                        type="text"
+                        id="complementoSaida"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      for="bairroSaida"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Bairro *</label
+                    >
+                    <input
+                      type="text"
+                      id="bairroSaida"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span class="error-message" id="error-bairroSaida"></span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="cidadeSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Cidade *</label
+                      >
+                      <input
+                        type="text"
+                        id="cidadeSaida"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span class="error-message" id="error-cidadeSaida"></span>
+                    </div>
+                    <div>
+                      <label
+                        for="estadoSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Estado *</label
+                      >
+                      <input
+                        type="text"
+                        id="estadoSaida"
+                        maxlength="2"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span class="error-message" id="error-estadoSaida"></span>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="dataSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Data de saída *</label
+                      >
+                      <input
+                        type="date"
+                        id="dataSaida"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span class="error-message" id="error-dataSaida"></span>
+                    </div>
+                    <div>
+                      <label
+                        for="horarioSaida"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Horário de saída *</label
+                      >
+                      <input
+                        type="text"
+                        id="horarioSaida"
+                        inputmode="numeric"
+                        pattern="([01]\d|2[0-3]):[0-5]\d"
+                        placeholder="HH:MM"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-horarioSaida"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Destino -->
+              <div class="bg-green-50 p-5 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  🎯 Destino (Chegada)
+                </h3>
+
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                      <label
+                        for="cepChegada"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >CEP *</label
+                      >
+                      <input
+                        type="text"
+                        id="cepChegada"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="00000-000"
+                      />
+                      <span class="error-message" id="error-cepChegada"></span>
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >&nbsp;</label
+                      >
+                      <button
+                        type="button"
+                        id="buscarCepChegada"
+                        class="w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-3"
+                      >
+                        <span id="buscarCepChegada-text">Buscar</span>
+                        <span
+                          id="buscarCepChegada-spinner"
+                          class="spinner spinner-sm hidden"
+                        ></span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      for="ruaChegada"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Rua *</label
+                    >
+                    <input
+                      type="text"
+                      id="ruaChegada"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span class="error-message" id="error-ruaChegada"></span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="numeroChegada"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Número *</label
+                      >
+                      <input
+                        type="text"
+                        id="numeroChegada"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-numeroChegada"
+                      ></span>
+                    </div>
+                    <div>
+                      <label
+                        for="complementoChegada"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Complemento</label
+                      >
+                      <input
+                        type="text"
+                        id="complementoChegada"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      for="bairroChegada"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Bairro *</label
+                    >
+                    <input
+                      type="text"
+                      id="bairroChegada"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span class="error-message" id="error-bairroChegada"></span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="cidadeChegada"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Cidade *</label
+                      >
+                      <input
+                        type="text"
+                        id="cidadeChegada"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-cidadeChegada"
+                      ></span>
+                    </div>
+                    <div>
+                      <label
+                        for="estadoChegada"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Estado *</label
+                      >
+                      <input
+                        type="text"
+                        id="estadoChegada"
+                        maxlength="2"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span
+                        class="error-message"
+                        id="error-estadoChegada"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Retorno -->
+              <div class="bg-orange-50 p-5 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  🔄 Retorno (Opcional)
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      for="dataRetorno"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Data de retorno</label
+                    >
+                    <input
+                      type="date"
+                      id="dataRetorno"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span class="error-message" id="error-dataRetorno"></span>
+                  </div>
+                  <div>
+                    <label
+                      for="horarioRetorno"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Horário de retorno</label
+                    >
+                    <input
+                      type="text"
+                      id="horarioRetorno"
+                      inputmode="numeric"
+                      pattern="([01]\d|2[0-3]):[0-5]\d"
+                      placeholder="HH:MM"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span
+                      class="error-message"
+                      id="error-horarioRetorno"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dados de Aeroporto -->
+              <div
+                id="aeroportoContainer"
+                class="hidden bg-indigo-50 p-5 rounded-lg"
+              >
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  ✈️ Dados do aeroporto
+                </h3>
+
+                <div class="space-y-4">
+                  <div>
+                    <label
+                      for="numeroVoo"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Número do voo *</label
+                    >
+                    <input
+                      type="text"
+                      id="numeroVoo"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Ex: AA1234, G31234"
+                    />
+                    <span class="error-message" id="error-numeroVoo"></span>
+                  </div>
+
+                  <div>
+                    <label
+                      for="horarioChegada"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Horário de chegada do voo *</label
+                    >
+                    <input
+                      type="text"
+                      id="horarioChegada"
+                      inputmode="numeric"
+                      pattern="([01]\d|2[0-3]):[0-5]\d"
+                      placeholder="HH:MM"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span
+                      class="error-message"
+                      id="error-horarioChegada"
+                    ></span>
+                  </div>
+
+                  <div>
+                    <label
+                      for="quantidadeMalas"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Quantidade de malas *</label
+                    >
+                    <input
+                      type="number"
+                      id="quantidadeMalas"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0"
+                      min="0"
+                    />
+                    <span
+                      class="error-message"
+                      id="error-quantidadeMalas"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Paradas -->
+              <div class="bg-purple-50 p-5 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  🛑 Paradas intermediárias
+                </h3>
+
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Haverá deslocamento no destino (pontos de parada)?</label
+                  >
+                  <div class="flex gap-4">
+                    <label class="flex items-center">
+                      <input
+                        type="radio"
+                        name="temParadas"
+                        value="sim"
+                        class="mr-2"
+                      />
+                      <span>Sim</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="radio"
+                        name="temParadas"
+                        value="nao"
+                        class="mr-2"
+                        checked
+                      />
+                      <span>Não</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div id="paradasContainer" class="hidden">
+                  <div id="paradasList" class="space-y-4 mb-4"></div>
+                  <button
+                    type="button"
+                    id="addParada"
+                    class="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    + Adicionar parada
+                  </button>
+                  <span class="error-message" id="error-paradas"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Passageiros -->
+          <div id="step3" class="step-content hidden">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">
+              Lista de passageiros
+            </h2>
+
+            <div id="passageirosList" class="space-y-4 mb-6"></div>
+
+            <button
+              type="button"
+              id="addPassageiro"
+              class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-lg font-medium"
+            >
+              + Adicionar passageiro
+            </button>
+            <span class="error-message" id="error-passageiros"></span>
+          </div>
+
+          <!-- STEP 4: Revisão -->
+          <div id="step4" class="step-content hidden">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">
+              Revisão e envio
+            </h2>
+
+            <div id="reviewContent" class="space-y-6"></div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t">
+            <button
+              type="button"
+              id="prevBtn"
+              class="order-2 sm:order-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium hidden"
+            >
+              ← Anterior
+            </button>
+            <button
+              type="button"
+              id="nextBtn"
+              class="order-1 sm:order-2 sm:ml-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Próximo →
+            </button>
+            <button
+              type="button"
+              id="submitBtn"
+              class="order-1 sm:order-2 sm:ml-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium hidden"
+            >
+              <span id="submitBtnText">Enviar solicitação</span>
+              <span id="submitBtnSpinner" class="hidden">
+                <svg
+                  class="animate-spin inline-block h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Enviando...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Toast Container -->
+      <div
+        id="toast"
+        class="fixed bottom-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg hidden max-w-md"
+      >
+        <p id="toastMessage"></p>
+      </div>
+    </div>
+
+    <script src="../src/index.js"></script>
+  </body>
+</html>

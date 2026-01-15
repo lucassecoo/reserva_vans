@@ -1,0 +1,549 @@
+/* ==================== VARIÁVEIS E RESET ==================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ==================== MENSAGENS DE ERRO ==================== */
+.error-message {
+  display: none;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* ==================== INPUTS COM ERRO ==================== */
+input.border-red-500,
+select.border-red-500,
+textarea.border-red-500 {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2;
+}
+
+input.border-red-500:focus,
+select.border-red-500:focus,
+textarea.border-red-500:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+
+/* ==================== TRANSIÇÕES SUAVES ==================== */
+.step-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== PROGRESS BAR ==================== */
+#progressBar {
+  transition: width 0.4s ease-in-out;
+}
+
+/* ==================== BOTÕES ==================== */
+button {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* ==================== LOADING SPINNER ==================== */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 2px solid white;
+  animation: spin 0.8s linear infinite;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.spinner.hidden {
+  visibility: hidden;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  border: none;
+  animation: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-dark {
+  border: 2px solid rgba(31, 41, 55, 0.2);
+  border-top: 2px solid #1f2937;
+}
+
+.spinner-sm {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-top: 1.5px solid white;
+}
+
+/* ==================== INPUTS E SELECTS ==================== */
+input[type="text"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select,
+textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2e7d32; /* verde principal */
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12);
+}
+
+/* ==================== CARDS DE PARADAS E PASSAGEIROS ==================== */
+#paradasList > div,
+#passageirosList > div {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ==================== TOAST ==================== */
+#toast {
+  animation: slideUp 0.3s ease-out;
+  z-index: 1000;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== SPINNER ==================== */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ==================== RESPONSIVIDADE MOBILE ==================== */
+@media (max-width: 640px) {
+  /* Inputs maiores em mobile para melhor usabilidade */
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px; /* Previne zoom automático no iOS */
+    padding: 0.875rem 1rem;
+  }
+
+  /* Botões mais espaçados em mobile */
+  button {
+    min-height: 48px; /* Facilita toque em mobile */
+  }
+
+  /* Cards com menos padding em mobile */
+  #paradasList > div,
+  #passageirosList > div {
+    padding: 1rem;
+  }
+}
+
+/* ==================== ACESSIBILIDADE ==================== */
+/* Foco visível para navegação por teclado */
+*:focus-visible {
+  outline: 2px solid #2e7d32; /* verde principal */
+  outline-offset: 2px;
+}
+
+/* Remove outline padrão apenas quando usando mouse */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  body {
+    background: white;
+  }
+
+  #progressBar,
+  button,
+  #toast {
+    display: none !important;
+  }
+
+  .step-content {
+    display: block !important;
+  }
+
+  input,
+  select,
+  textarea {
+    border: 1px solid #000;
+    background: white;
+  }
+}
+
+/* ==================== PLACEHOLDER STYLES ==================== */
+::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+:-ms-input-placeholder {
+  color: #9ca3af;
+}
+
+::-ms-input-placeholder {
+  color: #9ca3af;
+}
+
+/* ==================== SCROLLBAR CUSTOMIZAÇÃO ==================== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4faf4; /* neutro com leve toque de verde */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bcd4c4; /* tom verde-acinzentado */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8fb79e; /* hover mais escuro */
+}
+
+/* ==================== ESTADOS DE HOVER ==================== */
+.bg-blue-50:hover {
+  background-color: #eef8ef; /* leve verde */
+}
+
+.bg-green-50:hover {
+  background-color: #eefaf0; /* verde claro */
+}
+
+.bg-purple-50:hover {
+  background-color: #f9fbf9; /* neutro suave */
+}
+
+/* ==================== CARDS DE REVISÃO ==================== */
+#reviewContent > div {
+  animation: fadeIn 0.4s ease-in-out;
+  animation-fill-mode: both;
+}
+
+#reviewContent > div:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+#reviewContent > div:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+#reviewContent > div:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+#reviewContent > div:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* ==================== DESTAQUE DO FORMULÁRIO E CAMPOS ==================== */
+/* Destacar o contêiner do formulário com borda e sombra suave */
+.max-w-4xl {
+  border: 1px solid rgba(46, 125, 50, 0.18); /* verde suave */
+  box-shadow: 0 8px 30px rgba(46, 125, 50, 0.055);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbf6 100%);
+}
+
+/* Overlay de sucesso centralizado */
+#successOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+#successOverlay .success-box {
+  background-color: #e8f5e9; /* verde claro e suave */
+  color: #1b5e20;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  max-width: 28rem;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  position: relative;
+  border: 1px solid #c8e6c9; /* borda verde suave */
+}
+
+#successOverlay .success-box p {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #1b5e20; /* garantir cor do texto */
+}
+
+#successOverlay .success-logo {
+  height: 56px;
+  margin-top: 0.75rem;
+}
+
+#successOverlay .success-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #2e7d32; /* ícone/botão fechar em verde */
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Aplicar cor suave ao fundo fora do container para destacar o formulário */
+body {
+  /* fundo externo discreto cinza */
+  background-color: #616263;
+  color: #0f172a; /* texto escuro neutro */
+}
+
+/* Opcional: adicionar um leve contorno exterior para melhorar contraste */
+@media (min-width: 768px) {
+  .max-w-4xl {
+    padding: 2rem;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(244, 247, 251, 0.7),
+      rgba(230, 235, 245, 0.8)
+    );
+    z-index: -1;
+  }
+
+  /* Desktop: posicionar a logo colada no canto direito do cabeçalho */
+  #pageHeader .header-inner {
+    position: relative;
+  }
+
+  #pageHeader .header-logo {
+    position: absolute;
+    right: 1.5rem; /* alinhado ao padding interno do header (p-6 = 1.5rem) */
+    top: 50%;
+    transform: translateY(-50%);
+    height: auto;
+    max-height: 64px;
+  }
+
+  /* Espaço à direita do texto para não sobrepor a logo */
+  #pageHeader .header-text {
+    padding-right: 6.5rem; /* suficiente para o espaço da logo */
+  }
+}
+
+/* Bordas dos campos um pouco mais fortes e consistentes */
+input[type="text"],
+input[type="date"],
+input[type="tel"],
+select,
+textarea {
+  border: 1.25px solid #abb8aecc; /* borda neutra com toque verde */
+  background: #ffffff;
+  border-radius: 0.5rem;
+}
+
+/* Foco mais pronunciado para inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2e7d32; /* verde principal */
+  box-shadow: 0 10px 30px rgba(46, 125, 50, 0.1);
+}
+
+/* Ajuste visual nos cartões internos (seções) */
+.bg-white.rounded-lg.shadow-sm {
+  border: 1px solid rgba(15, 23, 42, 0.185);
+  padding: 1.25rem;
+}
+
+/* Pequeno destaque em hover para campos para melhorar a sensação de interatividade */
+input[type="text"]:hover,
+input[type="tel"]:hover,
+select:hover,
+textarea:hover {
+  border-color: #9fbca8; /* hover neutro-verde */
+}
+
+/* Botão buscar CEP nas paradas: altura e borda consistentes com inputs */
+#paradasList button[id$="-buscarCep"] {
+  min-height: 40px;
+  height: 40px;
+  padding: 0 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.25px solid #abb8aecc;
+  background-color: #616161;
+  color: #ffffff;
+  border-radius: 0.5rem; /* igual aos inputs */
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#paradasList button[id$="-buscarCep"]:hover {
+  background-color: #4b5563;
+}
+
+/* ==================== MOBILE: HEADER MENOR E LAYOUT EMPILHADO ==================== */
+@media (max-width: 640px) {
+  /* Cabeçalho full-width, porém com altura limitada para ficar apenas como header */
+  #pageHeader {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+    min-height: auto;
+    max-height: 220px; /* limite de altura para não ocupar toda a tela */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    box-shadow: 0 8px 30px rgba(46, 125, 50, 0.055);
+  }
+
+  /* Empilhar conteúdo: texto em cima e logo embaixo */
+  #pageHeader .header-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  #pageHeader .header-text {
+    text-align: center;
+  }
+
+  /* Logo reduzida para caber no header menor */
+  #pageHeader .header-logo {
+    height: 40px !important;
+    width: auto;
+    margin-top: 0.25rem;
+  }
+
+  /* Não sobrescrever o background do body — manter o cinza fora do header */
+  /* Mantemos o padding do body para a página continuar alinhada */
+
+  /* ==================== FORM: OCUPAR TELA INTEIRA NO MOBILE ==================== */
+  .max-w-4xl {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+    min-height: 100vh; /* força o contêiner a ocupar toda a altura da tela */
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    box-shadow: none;
+    background: linear-gradient(180deg, #ffffff 0%, #f6fbf6 100%);
+  }
+
+  /* Garante que o conteúdo principal (formulário) role internamente se necessário */
+  .max-w-4xl > * {
+    /* opcional: manter o conteúdo com scroll interno sem expor o body */
+    min-height: 100%;
+  }
+
+  /* Remover fundo cinza no topo e rodapé em mobile */
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    background-color: #ffffff; /* garante branco por trás de todo o conteúdo */
+  }
+
+  body {
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: #ffffff;
+  }
+
+  /* Garante que não haja overlays/degradês aplicados via pseudo-elementos em telas pequenas */
+  body::before {
+    display: none;
+  }
+
+  /* Remove quaisquer margens verticais do contêiner principal */
+  .max-w-4xl {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
