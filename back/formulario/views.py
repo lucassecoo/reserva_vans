@@ -6,6 +6,7 @@ from .models import (
     DestinoViagem, RetornoViagem,
     ParadasViagem, Passageiro, DadosAeroporto
 )
+from .utils.pdf import gerar_pdf_viagem
 
 class CriarViagemView(APIView):
     def post(self, request):
@@ -52,6 +53,8 @@ class CriarViagemView(APIView):
                 viagem=viagem,
                 **p
             )
+
+        gerar_pdf_viagem(viagem)
 
         return Response(
             {

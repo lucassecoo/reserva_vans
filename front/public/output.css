@@ -12,25 +12,25 @@
     --color-red-600: oklch(57.7% 0.245 27.325);
     --color-red-800: oklch(44.4% 0.177 26.899);
     --color-orange-50: oklch(98% 0.016 73.684);
-    --color-green-50: #f1fbf1; /* fundo neutro com toque verde */
-    --color-green-600: #2e7d32; /* cor principal da marca */
-    --color-green-700: #245e29; /* tom mais escuro para variações */
-    --color-blue-50: #f1fbf1; /* mapeado para verdes claros */
-    --color-blue-500: #3b8b3a;
-    --color-blue-600: #2e7d32; /* torna utilitários 'blue' verdes */
+    --color-green-50: #f0f9f0;
+    --color-green-600: #2d7a30;
+    --color-green-700: #1f5e23;
+    --color-blue-50: #f0f9f0;
+    --color-blue-500: #3a8839;
+    --color-blue-600: #2d7a30;
     --color-blue-700: #1b5e20;
     --color-purple-50: oklch(97.7% 0.014 308.299);
     --color-purple-200: oklch(90.2% 0.063 306.703);
     --color-purple-600: oklch(55.8% 0.288 302.321);
     --color-purple-700: oklch(49.6% 0.265 301.924);
-    --color-gray-50: #f6fbf6; /* neutro claro com leve toque de verde */
-    --color-gray-200: #e6eef0;
-    --color-gray-300: #d6dde0;
-    --color-gray-400: #bfc9cc;
-    --color-gray-500: #98a2a5;
-    --color-gray-600: #6b7280;
-    --color-gray-700: #374151;
-    --color-gray-900: #0f172a; /* texto escuro neutro */
+    --color-gray-50: #f8faf8;
+    --color-gray-200: #e8ede9;
+    --color-gray-300: #d4dbd5;
+    --color-gray-400: #b8c3ba;
+    --color-gray-500: #8f9b92;
+    --color-gray-600: #5f6d62;
+    --color-gray-700: #3d4a40;
+    --color-gray-900: #1a2420;
     --color-white: #fff;
     --spacing: 0.25rem;
     --container-md: 28rem;
@@ -48,7 +48,7 @@
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
-    --radius-lg: 0.5rem;
+    --radius-lg: 0.75rem;
     --animate-spin: spin 1s linear infinite;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -69,7 +69,7 @@
   }
   html,
   :host {
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-text-size-adjust: 100%;
     tab-size: 4;
     font-family: var(
@@ -85,6 +85,8 @@
     font-feature-settings: var(--default-font-feature-settings, normal);
     font-variation-settings: var(--default-font-variation-settings, normal);
     -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   hr {
     height: 0;
@@ -110,7 +112,7 @@
     text-decoration: inherit;
   }
   b,
-  stronblock text-sm font-medium text-gray-700 mb-1g {
+  strong {
     font-weight: bolder;
   }
   code,

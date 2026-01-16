@@ -4,8 +4,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ==================== MENSAGENS DE ERRO ==================== */
@@ -13,8 +14,13 @@ body {
   display: none;
   color: #dc2626;
   font-size: 0.875rem;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  background-color: #fef2f2;
+  border-left: 3px solid #dc2626;
+  border-radius: 0.375rem;
+  animation: slideIn 0.3s ease-out;
 }
 
 /* ==================== INPUTS COM ERRO ==================== */
@@ -28,18 +34,18 @@ textarea.border-red-500 {
 input.border-red-500:focus,
 select.border-red-500:focus,
 textarea.border-red-500:focus {
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
 }
 
 /* ==================== TRANSIÇÕES SUAVES ==================== */
 .step-content {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.4s ease-in-out;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -49,38 +55,48 @@ textarea.border-red-500:focus {
 
 /* ==================== PROGRESS BAR ==================== */
 #progressBar {
-  transition: width 0.4s ease-in-out;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
 }
 
 /* ==================== BOTÕES ==================== */
 button {
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
 button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.08);
 }
 
 button:active:not(:disabled) {
   transform: translateY(0);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+}
+
+button:focus-visible {
+  outline: 2px solid #2e7d32;
+  outline-offset: 3px;
 }
 
 /* ==================== LOADING SPINNER ==================== */
 .spinner {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  border-top: 2px solid white;
-  animation: spin 0.8s linear infinite;
+  border-top-color: white;
+  animation: spin 0.7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   visibility: visible;
   opacity: 1;
   transition: opacity 0.2s ease-in-out;
@@ -105,45 +121,80 @@ button:active:not(:disabled) {
 }
 
 .spinner-dark {
-  border: 2px solid rgba(31, 41, 55, 0.2);
-  border-top: 2px solid #1f2937;
+  border: 2.5px solid rgba(31, 41, 55, 0.15);
+  border-top-color: #1f2937;
 }
 
 .spinner-sm {
-  width: 12px;
-  height: 12px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-top: 1.5px solid white;
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
 }
 
 /* ==================== INPUTS E SELECTS ==================== */
 input[type="text"],
 input[type="date"],
 input[type="time"],
+input[type="tel"],
 input[type="number"],
 select,
 textarea {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid #d1ddd4;
+  background: #ffffff;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #2e7d32; /* verde principal */
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12);
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08), 0 2px 8px rgba(46, 125, 50, 0.1);
+  background-color: #fafffe;
+}
+
+input:hover:not(:focus),
+select:hover:not(:focus),
+textarea:hover:not(:focus) {
+  border-color: #a8c4b0;
+}
+
+/* Melhor estilo para placeholders */
+::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+  font-weight: 400;
+}
+
+:-ms-input-placeholder {
+  color: #9ca3af;
+}
+
+::-ms-input-placeholder {
+  color: #9ca3af;
 }
 
 /* ==================== CARDS DE PARADAS E PASSAGEIROS ==================== */
 #paradasList > div,
 #passageirosList > div {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+#paradasList > div:hover,
+#passageirosList > div:hover {
+  box-shadow: 0 4px 12px -2px rgba(46, 125, 50, 0.08);
+  border-color: #d1ddd4;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-25px);
   }
   to {
     opacity: 1;
@@ -153,28 +204,24 @@ textarea:focus {
 
 /* ==================== TOAST ==================== */
 #toast {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.2), 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* ==================== SPINNER ==================== */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* ==================== SPINNER ANIMATION ==================== */
 .animate-spin {
   animation: spin 1s linear infinite;
 }
@@ -185,30 +232,36 @@ textarea:focus {
   input[type="text"],
   input[type="date"],
   input[type="time"],
+  input[type="tel"],
   input[type="number"],
   select,
   textarea {
     font-size: 16px; /* Previne zoom automático no iOS */
-    padding: 0.875rem 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.625rem;
   }
 
   /* Botões mais espaçados em mobile */
   button {
     min-height: 48px; /* Facilita toque em mobile */
+    font-size: 1rem;
+    border-radius: 0.625rem;
   }
 
-  /* Cards com menos padding em mobile */
+  /* Cards com melhor padding em mobile */
   #paradasList > div,
   #passageirosList > div {
-    padding: 1rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
   }
 }
 
 /* ==================== ACESSIBILIDADE ==================== */
 /* Foco visível para navegação por teclado */
 *:focus-visible {
-  outline: 2px solid #2e7d32; /* verde principal */
-  outline-offset: 2px;
+  outline: 2px solid #2e7d32;
+  outline-offset: 3px;
+  border-radius: 0.25rem;
 }
 
 /* Remove outline padrão apenas quando usando mouse */
@@ -240,51 +293,41 @@ textarea:focus {
   }
 }
 
-/* ==================== PLACEHOLDER STYLES ==================== */
-::placeholder {
-  color: #9ca3af;
-  opacity: 1;
-}
-
-:-ms-input-placeholder {
-  color: #9ca3af;
-}
-
-::-ms-input-placeholder {
-  color: #9ca3af;
-}
-
 /* ==================== SCROLLBAR CUSTOMIZAÇÃO ==================== */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f4faf4; /* neutro com leve toque de verde */
-  border-radius: 5px;
+  background: #f6fbf6;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #bcd4c4; /* tom verde-acinzentado */
-  border-radius: 5px;
+  background: linear-gradient(180deg, #bcd4c4 0%, #a8c4b0 100%);
+  border-radius: 6px;
+  border: 2px solid #f6fbf6;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8fb79e; /* hover mais escuro */
+  background: linear-gradient(180deg, #a8c4b0 0%, #8fb79e 100%);
 }
 
 /* ==================== ESTADOS DE HOVER ==================== */
 .bg-blue-50:hover {
-  background-color: #eef8ef; /* leve verde */
+  background-color: #eef8ef;
+  transition: background-color 0.2s ease;
 }
 
 .bg-green-50:hover {
-  background-color: #eefaf0; /* verde claro */
+  background-color: #e8f5e9;
+  transition: background-color 0.2s ease;
 }
 
 .bg-purple-50:hover {
-  background-color: #f9fbf9; /* neutro suave */
+  background-color: #f5f9f6;
+  transition: background-color 0.2s ease;
 }
 
 /* ==================== CARDS DE REVISÃO ==================== */
@@ -294,29 +337,42 @@ textarea:focus {
 }
 
 #reviewContent > div:nth-child(1) {
-  animation-delay: 0.1s;
+  animation-delay: 0.05s;
 }
 
 #reviewContent > div:nth-child(2) {
-  animation-delay: 0.2s;
+  animation-delay: 0.15s;
 }
 
 #reviewContent > div:nth-child(3) {
-  animation-delay: 0.3s;
+  animation-delay: 0.25s;
 }
 
 #reviewContent > div:nth-child(4) {
-  animation-delay: 0.4s;
+  animation-delay: 0.35s;
 }
 
 /* ==================== DESTAQUE DO FORMULÁRIO E CAMPOS ==================== */
 /* Destacar o contêiner do formulário com borda e sombra suave */
 .max-w-4xl {
-  border: 1px solid rgba(46, 125, 50, 0.18); /* verde suave */
-  box-shadow: 0 8px 30px rgba(46, 125, 50, 0.055);
-  border-radius: 0.85rem;
-  padding: 1.25rem;
-  background: linear-gradient(180deg, #ffffff 0%, #f6fbf6 100%);
+  border: 1px solid rgba(46, 125, 50, 0.12);
+  box-shadow: 0 12px 40px -8px rgba(46, 125, 50, 0.08), 0 4px 16px -4px rgba(46, 125, 50, 0.04);
+  border-radius: 1rem;
+  padding: 2rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fcf9 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.max-w-4xl::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2e7d32 0%, #43a047 50%, #2e7d32 100%);
+  opacity: 0.8;
 }
 
 /* Overlay de sucesso centralizado */
@@ -327,223 +383,311 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 #successOverlay .success-box {
-  background-color: #e8f5e9; /* verde claro e suave */
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f2 100%);
   color: #1b5e20;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  max-width: 28rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 30rem;
   width: 90%;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.25), 0 8px 24px -8px rgba(0, 0, 0, 0.15);
   position: relative;
-  border: 1px solid #c8e6c9; /* borda verde suave */
+  border: 1px solid rgba(46, 125, 50, 0.2);
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 #successOverlay .success-box p {
   font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.4;
-  color: #1b5e20; /* garantir cor do texto */
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #1b5e20;
+  margin: 0.75rem 0;
 }
 
 #successOverlay .success-logo {
-  height: 56px;
-  margin-top: 0.75rem;
+  height: 60px;
+  margin-top: 1rem;
+  filter: drop-shadow(0 4px 8px rgba(46, 125, 50, 0.15));
 }
 
 #successOverlay .success-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.8);
   border: none;
-  color: #2e7d32; /* ícone/botão fechar em verde */
-  font-size: 1.25rem;
+  color: #2e7d32;
+  font-size: 1.5rem;
   cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+#successOverlay .success-close:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: rotate(90deg);
 }
 
 /* Aplicar cor suave ao fundo fora do container para destacar o formulário */
 body {
-  /* fundo externo discreto cinza */
-  background-color: #616263;
-  color: #0f172a; /* texto escuro neutro */
+  background: linear-gradient(135deg, #5a5c5d 0%, #6e7071 100%);
+  color: #0f172a;
+  min-height: 100vh;
 }
 
-/* Opcional: adicionar um leve contorno exterior para melhorar contraste */
+/* ==================== LABELS MELHORADOS ==================== */
+label {
+  font-weight: 500;
+  color: #374151;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+/* ==================== AJUSTES NOS CARTÕES INTERNOS ==================== */
+.bg-white.rounded-lg.shadow-sm {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.bg-white.rounded-lg.shadow-sm:hover {
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* ==================== BOTÃO BUSCAR CEP ==================== */
+#paradasList button[id$="-buscarCep"] {
+  min-height: 42px;
+  height: 42px;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1.5px solid transparent;
+  background: linear-gradient(135deg, #616161 0%, #757575 100%);
+  color: #ffffff;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.15);
+}
+
+#paradasList button[id$="-buscarCep"]:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #616161 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.2);
+}
+
+#paradasList button[id$="-buscarCep"]:active {
+  transform: translateY(0);
+}
+
+/* ==================== DESKTOP: HEADER E LOGO ==================== */
 @media (min-width: 768px) {
   .max-w-4xl {
-    padding: 2rem;
+    padding: 2.5rem;
   }
+
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(244, 247, 251, 0.7),
-      rgba(230, 235, 245, 0.8)
-    );
+    background: linear-gradient(135deg, rgba(90, 92, 93, 0.95) 0%, rgba(110, 112, 113, 0.95) 100%);
     z-index: -1;
   }
 
   /* Desktop: posicionar a logo colada no canto direito do cabeçalho */
   #pageHeader .header-inner {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   #pageHeader .header-logo {
     position: absolute;
-    right: 1.5rem; /* alinhado ao padding interno do header (p-6 = 1.5rem) */
+    right: 2rem;
     top: 50%;
     transform: translateY(-50%);
     height: auto;
-    max-height: 64px;
+    max-height: 72px;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+    transition: all 0.3s ease;
+  }
+
+  #pageHeader .header-logo:hover {
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
+    transform: translateY(-50%) scale(1.02);
   }
 
   /* Espaço à direita do texto para não sobrepor a logo */
   #pageHeader .header-text {
-    padding-right: 6.5rem; /* suficiente para o espaço da logo */
+    padding-right: 8rem;
   }
 }
 
-/* Bordas dos campos um pouco mais fortes e consistentes */
-input[type="text"],
-input[type="date"],
-input[type="tel"],
-select,
-textarea {
-  border: 1.25px solid #abb8aecc; /* borda neutra com toque verde */
-  background: #ffffff;
-  border-radius: 0.5rem;
-}
-
-/* Foco mais pronunciado para inputs */
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #2e7d32; /* verde principal */
-  box-shadow: 0 10px 30px rgba(46, 125, 50, 0.1);
-}
-
-/* Ajuste visual nos cartões internos (seções) */
-.bg-white.rounded-lg.shadow-sm {
-  border: 1px solid rgba(15, 23, 42, 0.185);
-  padding: 1.25rem;
-}
-
-/* Pequeno destaque em hover para campos para melhorar a sensação de interatividade */
-input[type="text"]:hover,
-input[type="tel"]:hover,
-select:hover,
-textarea:hover {
-  border-color: #9fbca8; /* hover neutro-verde */
-}
-
-/* Botão buscar CEP nas paradas: altura e borda consistentes com inputs */
-#paradasList button[id$="-buscarCep"] {
-  min-height: 40px;
-  height: 40px;
-  padding: 0 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.25px solid #abb8aecc;
-  background-color: #616161;
-  color: #ffffff;
-  border-radius: 0.5rem; /* igual aos inputs */
-  font-size: 0.875rem;
-  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-#paradasList button[id$="-buscarCep"]:hover {
-  background-color: #4b5563;
-}
-
-/* ==================== MOBILE: HEADER MENOR E LAYOUT EMPILHADO ==================== */
+/* ==================== MOBILE: HEADER E LAYOUT ==================== */
 @media (max-width: 640px) {
-  /* Cabeçalho full-width, porém com altura limitada para ficar apenas como header */
+  /* Cabeçalho full-width otimizado */
   #pageHeader {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
     border-radius: 0;
     min-height: auto;
-    max-height: 220px; /* limite de altura para não ocupar toda a tela */
+    max-height: 240px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    box-shadow: 0 8px 30px rgba(46, 125, 50, 0.055);
+    padding: 1.25rem 1rem;
+    box-shadow: 0 4px 16px -4px rgba(46, 125, 50, 0.12);
   }
 
   /* Empilhar conteúdo: texto em cima e logo embaixo */
   #pageHeader .header-inner {
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    text-align: center;
   }
 
   #pageHeader .header-text {
     text-align: center;
+    padding-right: 0;
   }
 
-  /* Logo reduzida para caber no header menor */
+  #pageHeader .header-text h1 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  /* Logo reduzida para mobile */
   #pageHeader .header-logo {
-    height: 40px !important;
+    height: 44px !important;
     width: auto;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
   }
 
-  /* Não sobrescrever o background do body — manter o cinza fora do header */
-  /* Mantemos o padding do body para a página continuar alinhada */
-
-  /* ==================== FORM: OCUPAR TELA INTEIRA NO MOBILE ==================== */
+  /* Form ocupando toda a tela no mobile */
   .max-w-4xl {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
     border-radius: 0;
-    min-height: 100vh; /* força o contêiner a ocupar toda a altura da tela */
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    min-height: 100vh;
+    padding: 1.5rem 1rem;
     box-shadow: none;
-    background: linear-gradient(180deg, #ffffff 0%, #f6fbf6 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f9fcf9 100%);
+    border: none;
   }
 
-  /* Garante que o conteúdo principal (formulário) role internamente se necessário */
-  .max-w-4xl > * {
-    /* opcional: manter o conteúdo com scroll interno sem expor o body */
-    min-height: 100%;
+  .max-w-4xl::before {
+    display: none;
   }
 
-  /* Remover fundo cinza no topo e rodapé em mobile */
+  /* Remover fundo cinza no mobile */
   html,
   body {
     height: 100%;
     margin: 0;
-    background-color: #ffffff; /* garante branco por trás de todo o conteúdo */
-  }
-
-  body {
-    padding-top: 0;
-    padding-bottom: 0;
     background-color: #ffffff;
   }
 
-  /* Garante que não haja overlays/degradês aplicados via pseudo-elementos em telas pequenas */
+  body {
+    padding: 0;
+    background: #ffffff;
+  }
+
   body::before {
     display: none;
   }
 
-  /* Remove quaisquer margens verticais do contêiner principal */
   .max-w-4xl {
     margin-top: 0;
     margin-bottom: 0;
   }
+
+  /* Ajuste cards internos em mobile */
+  .bg-white.rounded-lg.shadow-sm {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+  }
+}
+
+/* ==================== ANIMAÇÕES DE MICRO-INTERAÇÃO ==================== */
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  input,
+  select,
+  textarea {
+    transition-property: transform, box-shadow, background-color, border-color;
+  }
+}
+
+/* Respeitar preferências de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================== TIPOGRAFIA APRIMORADA ==================== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: #1f2937;
+}
+
+p {
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+/* ==================== ESTADOS DE DESABILITADO MELHORADOS ==================== */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ==================== BADGES E TAGS ==================== */
+.badge,
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
 }
