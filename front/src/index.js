@@ -1,10 +1,11 @@
 // ==================== ESTADO GLOBAL ====================
 let currentStep = 1;
-const totalSteps = 4;
+const totalSteps = 5;
 let formData = {
   contratante: {},
   itinerario: { paradas: [] },
   passageiros: [],
+  comentarios_adicionais: "",
 };
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
@@ -118,6 +119,14 @@ function buildPayloadForDjango(data) {
     };
   }
 
+  // Transformar comentários_adicionais em comentario_adicional (singular, como dicionário)
+  let comentarioAdicionalPayload = null;
+  if (data.comentarios_adicionais && data.comentarios_adicionais.trim()) {
+    comentarioAdicionalPayload = {
+      comentario: data.comentarios_adicionais.trim(),
+    };
+  }
+
   return {
     contratante: contratantePayload,
     origem: origemPayload,
@@ -126,6 +135,7 @@ function buildPayloadForDjango(data) {
     dados_aeroporto: dadosAeroportoPayload,
     paradas: paradas,
     passageiros: passageiros,
+    comentario_adicional: comentarioAdicionalPayload,
   };
 }
 
@@ -182,6 +192,24 @@ function setupEventListeners() {
     .getElementById("dataRetorno")
     .addEventListener("change", validateDates);
 
+  // Checkboxes para aeroporto
+  const origemAeroportoCheckbox = document.getElementById("origemEhAeroporto");
+  if (origemAeroportoCheckbox) {
+    origemAeroportoCheckbox.addEventListener(
+      "change",
+      handleOrigemAeroportoChange,
+    );
+  }
+
+  const destinoAeroportoCheckbox =
+    document.getElementById("destinoEhAeroporto");
+  if (destinoAeroportoCheckbox) {
+    destinoAeroportoCheckbox.addEventListener(
+      "change",
+      handleDestinoAeroportoChange,
+    );
+  }
+
   // Step 3: Passageiros
   document
     .getElementById("addPassageiro")
@@ -211,7 +239,7 @@ function setupMasks() {
         if (value.length > 9) value = value.slice(0, 9);
         e.target.value = value.replace(
           /(\d{2})(\d{3})(\d{3})(\d)/,
-          "$1.$2.$3-$4"
+          "$1.$2.$3-$4",
         );
       });
     });
@@ -326,11 +354,55 @@ function handleCpfCnpjInput(e) {
   e.target.value = value;
 }
 
+// ==================== FUNÇÃO AUXILIAR: Verificar se é fora de Curitiba ====================
+function isOrigemOuDestinoForaDeCuritiba() {
+  const cepOrigem = (formData.itinerario?.saida?.endereco?.cep || "").replace(
+    /\D/g,
+    "",
+  );
+  const cepDestino = (
+    formData.itinerario?.chegada?.endereco?.cep || ""
+  ).replace(/\D/g, "");
+
+  // Curitiba tem CEPs que começam com 80, 81, 82 (80.000-000 até 82.999-999)
+  // Também inclui o CEP do Aeroporto Afonso Pena (83000-000)
+  const isCepOrigemCuritiba = /^8[0-3]\d{3}/.test(cepOrigem);
+  const isCepDestinoCuritiba = /^8[0-3]\d{3}/.test(cepDestino);
+
+  console.log("CEP Origem:", cepOrigem, "- É Curitiba?", isCepOrigemCuritiba);
+  console.log(
+    "CEP Destino:",
+    cepDestino,
+    "- É Curitiba?",
+    isCepDestinoCuritiba,
+  );
+
+  // Se AMBOS são Curitiba, retorna false (não é fora de Curitiba)
+  // Se QUALQUER UM é fora de Curitiba, retorna true
+  const result = !isCepOrigemCuritiba || !isCepDestinoCuritiba;
+  console.log("isOrigemOuDestinoForaDeCuritiba:", result);
+  return result;
+}
+
 // ==================== FUNÇÕES DE NAVEGAÇÃO ====================
 function nextStep() {
   if (validateCurrentStep()) {
     saveStepData();
-    currentStep++;
+
+    console.log("currentStep:", currentStep);
+    console.log(
+      "isOrigemOuDestinoForaDeCuritiba:",
+      isOrigemOuDestinoForaDeCuritiba(),
+    );
+
+    // Se estamos no Step 2 e é Curitiba -> Curitiba, pular o Step 3
+    if (currentStep === 2 && !isOrigemOuDestinoForaDeCuritiba()) {
+      console.log("Pulando Step 3 - viagem dentro de Curitiba");
+      currentStep = 4; // Pular Step 3 (passageiros)
+    } else {
+      currentStep++;
+    }
+
     updateStepDisplay();
     focusFirstInput();
     saveDraft(); // Auto-save
@@ -338,14 +410,21 @@ function nextStep() {
     console.warn("nextStep blocked: validation failed");
     showToast(
       "Existem erros no formulário — verifique os campos em vermelho",
-      true
+      true,
     );
   }
 }
 
 function prevStep() {
   saveStepData();
-  currentStep--;
+
+  // Se voltando do Step 4 para trás e é Curitiba -> Curitiba, voltar para Step 2
+  if (currentStep === 4 && !isOrigemOuDestinoForaDeCuritiba()) {
+    currentStep = 2; // Pular Step 3 (passageiros)
+  } else {
+    currentStep--;
+  }
+
   updateStepDisplay();
   focusFirstInput();
 }
@@ -359,16 +438,31 @@ function updateStepDisplay() {
   // Mostrar step atual
   document.getElementById(`step${currentStep}`).classList.remove("hidden");
 
-  // Atualizar progress bar
-  const progress = (currentStep / totalSteps) * 100;
+  // Calcular o total de steps efetivos considerando se o Step 3 é pulado
+  let effectiveSteps = totalSteps;
+  if (!isOrigemOuDestinoForaDeCuritiba()) {
+    effectiveSteps = totalSteps - 1; // Step 3 é pulado, então temos 4 steps efetivos
+  }
+
+  // Calcular o número do passo para exibição
+  let displayStep = currentStep;
+  if (!isOrigemOuDestinoForaDeCuritiba() && currentStep === 4) {
+    displayStep = 3; // Mostrar como step 3 (pois Step 3 foi pulado)
+  } else if (!isOrigemOuDestinoForaDeCuritiba() && currentStep === 5) {
+    displayStep = 4; // Mostrar como step 4 (pois Step 3 foi pulado)
+  }
+
+  // Calcular progresso baseado nos steps efetivos
+  const progress = (displayStep / effectiveSteps) * 100;
   document.getElementById("progressBar").style.width = `${progress}%`;
-  document.getElementById("currentStep").textContent = currentStep;
+  document.getElementById("currentStep").textContent = displayStep;
 
   // Atualizar título do step
   const stepTitles = [
     "Informações do contratante",
     "Detalhes do itinerário",
     "Lista de passageiros",
+    "Comentários adicionais",
     "Revisão e envio",
   ];
   document.getElementById("stepTitle").textContent =
@@ -409,6 +503,10 @@ function validateCurrentStep() {
       break;
     case 3:
       isValid = validateStep3();
+      break;
+    case 4:
+      // Step 4 (Comentários) não precisa de validação, é opcional
+      isValid = true;
       break;
   }
 
@@ -491,7 +589,7 @@ function validateStep1() {
   } else {
     const cpf = (document.getElementById("cpf") || { value: "" }).value.replace(
       /\D/g,
-      ""
+      "",
     );
     if (!cpf) {
       showError("cpf", "CPF é obrigatório");
@@ -542,7 +640,7 @@ function validateStep1() {
     if (!inscricaoEstadual) {
       showError(
         "inscricaoEstadual",
-        "Inscrição estadual é obrigatória para PJ"
+        "Inscrição estadual é obrigatória para PJ",
       );
       isValid = false;
     }
@@ -596,7 +694,7 @@ function validateStep2() {
     if (!horarioRetorno) {
       showError(
         "horarioRetorno",
-        "Horário de retorno é obrigatório quando há data de retorno"
+        "Horário de retorno é obrigatório quando há data de retorno",
       );
       isValid = false;
     } else if (!horarioRegex.test(horarioRetorno)) {
@@ -670,11 +768,11 @@ function validateStep2() {
       if (dtRetorno < dtSaida) {
         showError(
           "dataRetorno",
-          "Data/hora de retorno não pode ser anterior à saída"
+          "Data/hora de retorno não pode ser anterior à saída",
         );
         showError(
           "horarioRetorno",
-          "Horário de retorno não pode ser anterior à saída"
+          "Horário de retorno não pode ser anterior à saída",
         );
         isValid = false;
       }
@@ -688,35 +786,53 @@ function validateStep2() {
   // Validações de Aeroporto (apenas se motivação for "Aeroporto")
   const motivacao = document.getElementById("motivacao").value;
   if (motivacao === "Aeroporto") {
-    // Número do voo
-    const numeroVoo = document.getElementById("numeroVoo").value.trim();
-    if (!numeroVoo) {
-      showError("numeroVoo", "Número do voo é obrigatório");
-      isValid = false;
-    }
+    const destinoEhAeroporto =
+      document.getElementById("destinoEhAeroporto").checked;
 
-    // Horário de chegada
-    const horarioChegada = document
-      .getElementById("horarioChegada")
-      .value.trim();
-    if (!horarioChegada) {
-      showError("horarioChegada", "Horário de chegada é obrigatório");
-      isValid = false;
-    } else if (!horarioRegex.test(horarioChegada)) {
-      showError("horarioChegada", "Horário inválido (HH:MM)");
-      isValid = false;
-    }
+    // Se destino é aeroporto, apenas quantidade de malas é obrigatória
+    if (destinoEhAeroporto) {
+      const quantidadeMalas = document
+        .getElementById("quantidadeMalas")
+        .value.trim();
+      if (quantidadeMalas === "") {
+        showError("quantidadeMalas", "Quantidade de malas é obrigatória");
+        isValid = false;
+      } else if (isNaN(quantidadeMalas) || parseInt(quantidadeMalas) < 0) {
+        showError("quantidadeMalas", "Quantidade de malas inválida");
+        isValid = false;
+      }
+    } else {
+      // Se origem é aeroporto ou nenhuma é aeroporto, validar todos os campos
+      // Número do voo
+      const numeroVoo = document.getElementById("numeroVoo").value.trim();
+      if (!numeroVoo) {
+        showError("numeroVoo", "Número do voo é obrigatório");
+        isValid = false;
+      }
 
-    // Quantidade de malas
-    const quantidadeMalas = document
-      .getElementById("quantidadeMalas")
-      .value.trim();
-    if (quantidadeMalas === "") {
-      showError("quantidadeMalas", "Quantidade de malas é obrigatória");
-      isValid = false;
-    } else if (isNaN(quantidadeMalas) || parseInt(quantidadeMalas) < 0) {
-      showError("quantidadeMalas", "Quantidade de malas inválida");
-      isValid = false;
+      // Horário de chegada
+      const horarioChegada = document
+        .getElementById("horarioChegada")
+        .value.trim();
+      if (!horarioChegada) {
+        showError("horarioChegada", "Horário de chegada é obrigatório");
+        isValid = false;
+      } else if (!horarioRegex.test(horarioChegada)) {
+        showError("horarioChegada", "Horário inválido (HH:MM)");
+        isValid = false;
+      }
+
+      // Quantidade de malas
+      const quantidadeMalas = document
+        .getElementById("quantidadeMalas")
+        .value.trim();
+      if (quantidadeMalas === "") {
+        showError("quantidadeMalas", "Quantidade de malas é obrigatória");
+        isValid = false;
+      } else if (isNaN(quantidadeMalas) || parseInt(quantidadeMalas) < 0) {
+        showError("quantidadeMalas", "Quantidade de malas inválida");
+        isValid = false;
+      }
     }
   }
 
@@ -724,6 +840,11 @@ function validateStep2() {
 }
 
 function validateStep3() {
+  // Se é viagem em Curitiba (origem e destino), passageiros são opcionais
+  if (!isOrigemOuDestinoForaDeCuritiba()) {
+    return true; // Não obrigatório
+  }
+
   // Garantir que o array de passageiros esteja sincronizado com o DOM
   collectPassageiros();
   if (formData.passageiros.length === 0) {
@@ -741,7 +862,7 @@ function validateDates() {
   if (dataSaida && dataRetorno && dataRetorno < dataSaida) {
     showError(
       "dataRetorno",
-      "Data de retorno não pode ser anterior à data de saída"
+      "Data de retorno não pode ser anterior à data de saída",
     );
     return false;
   }
@@ -865,7 +986,16 @@ function saveStepData() {
     case 3:
       // Passageiros já salvos em tempo real
       break;
+    case 4:
+      saveStep4Data();
+      break;
   }
+}
+
+function saveStep4Data() {
+  formData.comentarios_adicionais = document
+    .getElementById("comentariosAdicionais")
+    .value.trim();
 }
 
 function saveStep1Data() {
@@ -955,6 +1085,12 @@ function saveStep2Data() {
 function handleMotivacaoChange(e) {
   const container = document.getElementById("motivacaoOutroContainer");
   const aeroportoContainer = document.getElementById("aeroportoContainer");
+  const checkboxOrigemContainer = document.getElementById(
+    "checkboxOrigemAeroportoContainer",
+  );
+  const checkboxDestinoContainer = document.getElementById(
+    "checkboxDestinoAeroportoContainer",
+  );
   const motivacao = e.target.value;
 
   // Mostrar/ocultar campo "Outro"
@@ -966,17 +1102,173 @@ function handleMotivacaoChange(e) {
     document.getElementById("motivacaoOutro").value = "";
   }
 
-  // Mostrar/ocultar container de aeroporto
+  // Mostrar/ocultar container de aeroporto e checkboxes
   if (motivacao === "Aeroporto") {
+    checkboxOrigemContainer.classList.remove("hidden");
+    checkboxDestinoContainer.classList.remove("hidden");
     aeroportoContainer.classList.remove("hidden");
-    document.getElementById("numeroVoo").focus();
+    // Mostrar campos de voo inicialmente
+    document
+      .getElementById("numeroVoo")
+      .parentElement.classList.remove("hidden");
+    document
+      .getElementById("horarioChegada")
+      .parentElement.classList.remove("hidden");
   } else {
+    checkboxOrigemContainer.classList.add("hidden");
+    checkboxDestinoContainer.classList.add("hidden");
     aeroportoContainer.classList.add("hidden");
+    // Limpar checkboxes
+    document.getElementById("origemEhAeroporto").checked = false;
+    document.getElementById("destinoEhAeroporto").checked = false;
+    // Mostrar formulários
+    document
+      .getElementById("formularioOrigemEndereco")
+      .classList.remove("hidden");
+    document
+      .getElementById("formularioDestinoEndereco")
+      .classList.remove("hidden");
+    // Mostrar campos de voo
+    document
+      .getElementById("numeroVoo")
+      .parentElement.classList.remove("hidden");
+    document
+      .getElementById("horarioChegada")
+      .parentElement.classList.remove("hidden");
     // Limpar os campos de aeroporto
     document.getElementById("numeroVoo").value = "";
     document.getElementById("horarioChegada").value = "";
     document.getElementById("quantidadeMalas").value = "";
   }
+}
+
+// ==================== HANDLERS PARA AEROPORTO ====================
+function handleOrigemAeroportoChange(e) {
+  const isAeroporto = e.target.checked;
+  const formulario = document.getElementById("formularioOrigemEndereco");
+  const destinoCheckboxContainer = document.getElementById(
+    "checkboxDestinoAeroportoContainer",
+  );
+  const destinoCheckbox = document.getElementById("destinoEhAeroporto");
+
+  if (isAeroporto) {
+    // Esconder formulário de endereço
+    formulario.classList.add("hidden");
+    // Esconder checkbox de destino
+    destinoCheckboxContainer.classList.add("hidden");
+    // Se destino estava marcado, desmarcar
+    if (destinoCheckbox.checked) {
+      destinoCheckbox.checked = false;
+      // Disparar o evento de mudança para limpar o destino
+      destinoCheckbox.dispatchEvent(new Event("change"));
+    }
+    // Preencher com dados do Aeroporto Afonso Pena
+    preencherAeroportoAfonsoPena("Origem");
+  } else {
+    // Mostrar formulário de endereço
+    formulario.classList.remove("hidden");
+    // Mostrar checkbox de destino
+    destinoCheckboxContainer.classList.remove("hidden");
+    // Limpar dados do aeroporto
+    limparOrigemAeroporto();
+  }
+}
+
+function handleDestinoAeroportoChange(e) {
+  const isAeroporto = e.target.checked;
+  const formulario = document.getElementById("formularioDestinoEndereco");
+  const aeroportoContainer = document.getElementById("aeroportoContainer");
+  const numeroVooDivParent = document.getElementById("numeroVoo").parentElement;
+  const horarioChegadaDivParent =
+    document.getElementById("horarioChegada").parentElement;
+  const origemCheckboxContainer = document.getElementById(
+    "checkboxOrigemAeroportoContainer",
+  );
+  const origemCheckbox = document.getElementById("origemEhAeroporto");
+
+  if (isAeroporto) {
+    // Esconder formulário de endereço
+    formulario.classList.add("hidden");
+    // Esconder campos de voo (apenas malas)
+    numeroVooDivParent.classList.add("hidden");
+    horarioChegadaDivParent.classList.add("hidden");
+    // Mostrar container de malas se não estiver visível
+    aeroportoContainer.classList.remove("hidden");
+    // Esconder checkbox de origem
+    origemCheckboxContainer.classList.add("hidden");
+    // Se origem estava marcada, desmarcar
+    if (origemCheckbox.checked) {
+      origemCheckbox.checked = false;
+      // Disparar o evento de mudança para limpar a origem
+      origemCheckbox.dispatchEvent(new Event("change"));
+    }
+    // Preencher com dados do Aeroporto Afonso Pena
+    preencherAeroportoAfonsoPena("Destino");
+  } else {
+    // Mostrar formulário de endereço
+    formulario.classList.remove("hidden");
+    // Mostrar campos de voo
+    numeroVooDivParent.classList.remove("hidden");
+    horarioChegadaDivParent.classList.remove("hidden");
+    // Mostrar checkbox de origem
+    origemCheckboxContainer.classList.remove("hidden");
+    // Limpar dados do aeroporto
+    limparDestinoAeroporto();
+  }
+}
+
+// ==================== FUNÇÕES AUXILIARES DE AEROPORTO ====================
+function preencherAeroportoAfonsoPena(tipo) {
+  // Dados do Aeroporto Internacional Afonso Pena (Curitiba)
+  const dadosAeroporto = {
+    cep: "83000-000",
+    rua: "Rodovia do Aeroporto",
+    numero: "1000",
+    complemento: null,
+    bairro: "Afonso Pena",
+    cidade: "São José dos Pinhais",
+    estado: "PR",
+  };
+
+  if (tipo === "Origem") {
+    document.getElementById("cepSaida").value = dadosAeroporto.cep;
+    document.getElementById("ruaSaida").value = dadosAeroporto.rua;
+    document.getElementById("numeroSaida").value = dadosAeroporto.numero;
+    document.getElementById("complementoSaida").value =
+      dadosAeroporto.complemento || "";
+    document.getElementById("bairroSaida").value = dadosAeroporto.bairro;
+    document.getElementById("cidadeSaida").value = dadosAeroporto.cidade;
+    document.getElementById("estadoSaida").value = dadosAeroporto.estado;
+  } else if (tipo === "Destino") {
+    document.getElementById("cepChegada").value = dadosAeroporto.cep;
+    document.getElementById("ruaChegada").value = dadosAeroporto.rua;
+    document.getElementById("numeroChegada").value = dadosAeroporto.numero;
+    document.getElementById("complementoChegada").value =
+      dadosAeroporto.complemento || "";
+    document.getElementById("bairroChegada").value = dadosAeroporto.bairro;
+    document.getElementById("cidadeChegada").value = dadosAeroporto.cidade;
+    document.getElementById("estadoChegada").value = dadosAeroporto.estado;
+  }
+}
+
+function limparOrigemAeroporto() {
+  document.getElementById("cepSaida").value = "";
+  document.getElementById("ruaSaida").value = "";
+  document.getElementById("numeroSaida").value = "";
+  document.getElementById("complementoSaida").value = "";
+  document.getElementById("bairroSaida").value = "";
+  document.getElementById("cidadeSaida").value = "";
+  document.getElementById("estadoSaida").value = "";
+}
+
+function limparDestinoAeroporto() {
+  document.getElementById("cepChegada").value = "";
+  document.getElementById("ruaChegada").value = "";
+  document.getElementById("numeroChegada").value = "";
+  document.getElementById("complementoChegada").value = "";
+  document.getElementById("bairroChegada").value = "";
+  document.getElementById("cidadeChegada").value = "";
+  document.getElementById("estadoChegada").value = "";
 }
 
 function handleParadasChange(e) {
@@ -1249,7 +1541,7 @@ function removePassageiro(passageiroId) {
 function collectPassageiros() {
   const passageiros = [];
   const passageiroElements = document.querySelectorAll(
-    "#passageirosList > div"
+    "#passageirosList > div",
   );
 
   passageiroElements.forEach((passEl) => {
@@ -1306,7 +1598,7 @@ function focusFirstInput() {
   const visibleStep = document.getElementById(`step${currentStep}`);
   if (!visibleStep) return;
   const firstInput = visibleStep.querySelector(
-    "input, select, textarea, button"
+    "input, select, textarea, button",
   );
   if (firstInput) firstInput.focus();
 }
@@ -1543,7 +1835,7 @@ function renderReview() {
   html.push(
     `<div><strong>Contratante:</strong> ${contratante.nome || "-"} (${
       contratante.cpf_cnpj || "-"
-    })</div>`
+    })</div>`,
   );
   if (itinerario.saida) {
     html.push(
@@ -1551,7 +1843,7 @@ function renderReview() {
         itinerario.saida.endereco.numero || "-"
       } - ${itinerario.saida.endereco.cidade || "-"} / ${
         itinerario.saida.endereco.estado || "-"
-      }</div>`
+      }</div>`,
     );
   }
   if (itinerario.chegada) {
@@ -1560,7 +1852,7 @@ function renderReview() {
         itinerario.chegada.endereco.rua || "-"
       }, ${itinerario.chegada.endereco.numero || "-"} - ${
         itinerario.chegada.endereco.cidade || "-"
-      } / ${itinerario.chegada.endereco.estado || "-"}</div>`
+      } / ${itinerario.chegada.endereco.estado || "-"}</div>`,
     );
   }
 
@@ -1571,25 +1863,45 @@ function renderReview() {
     html.push(
       `<div class="ml-4">Horário de Chegada: ${
         aeroporto.horarioChegada || "-"
-      }</div>`
+      }</div>`,
     );
     html.push(
       `<div class="ml-4">Quantidade de Malas: ${
         aeroporto.quantidadeMalas || "-"
-      }</div>`
+      }</div>`,
     );
   }
 
   html.push(
-    `<div><strong>Passageiros (${formData.passageiros.length}):</strong></div>`
+    `<div><strong>Passageiros (${formData.passageiros.length}):</strong></div>`,
   );
-  formData.passageiros.forEach((p, i) => {
+
+  // Mostrar passageiros apenas se houver (viagem fora de Curitiba)
+  if (formData.passageiros.length > 0) {
+    formData.passageiros.forEach((p, i) => {
+      html.push(
+        `<div class="ml-4">${i + 1}. ${p.nome || "-"} • ${
+          p.idade || "-"
+        } anos • RG: ${p.rg || "-"}</div>`,
+      );
+    });
+  } else if (isOrigemOuDestinoForaDeCuritiba()) {
     html.push(
-      `<div class="ml-4">${i + 1}. ${p.nome || "-"} • ${
-        p.idade || "-"
-      } anos • RG: ${p.rg || "-"}</div>`
+      `<div class="ml-4 text-red-600">Nenhum passageiro adicionado</div>`,
     );
-  });
+  } else {
+    html.push(
+      `<div class="ml-4 text-gray-500">Não necessário (Curitiba)</div>`,
+    );
+  }
+
+  // Mostrar comentários adicionais se houver
+  if (formData.comentarios_adicionais) {
+    html.push(`<div><strong>Comentários adicionais:</strong></div>`);
+    html.push(
+      `<div class="ml-4 whitespace-pre-wrap">${formData.comentarios_adicionais}</div>`,
+    );
+  }
 
   container.innerHTML = html.join("\n");
 }
@@ -1640,7 +1952,7 @@ async function submitForm(e) {
         (responseData && responseData.message) ||
           responseData ||
           res.statusText ||
-          "Erro no envio"
+          "Erro no envio",
       );
     }
 
@@ -1650,7 +1962,7 @@ async function submitForm(e) {
     });
     // Mostrar overlay de sucesso centralizado
     showSuccessOverlay(
-      "Solicitação enviada com sucesso! Recebemos sua solicitação e em breve entraremos em contato para confirmar sua reserva. Agradecemos a preferência."
+      "Solicitação enviada com sucesso! Recebemos sua solicitação e em breve entraremos em contato para confirmar sua reserva. Agradecemos a preferência.",
     );
     // Resetar formulário para evitar envios duplicados
     resetForm();

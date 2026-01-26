@@ -1,3 +1,4 @@
+from django.template.defaulttags import comment
 from rest_framework import serializers
 from .models import (
     Viagem,
@@ -7,7 +8,8 @@ from .models import (
     RetornoViagem,
     ParadasViagem,
     Passageiro,
-    DadosAeroporto
+    DadosAeroporto,
+    ComentarioAdicional
 )
 
 class ContratanteSerializer(serializers.ModelSerializer):
@@ -50,6 +52,11 @@ class DadosAeroportoSerializer(serializers.ModelSerializer):
         model = DadosAeroporto
         exclude = ['id', 'viagem']
 
+class ComentarioAdicionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ComentarioAdicional
+        exclude = ['id', 'viagem']
+
 class ViagemSerializer(serializers.ModelSerializer):
     contratante = ContratanteSerializer()
     origem = OrigemViagemSerializer()
@@ -58,6 +65,7 @@ class ViagemSerializer(serializers.ModelSerializer):
     paradas = ParadasViagemSerializer(many=True, required=False)
     passageiros = PassageiroSerializer(many=True)
     dados_aeroporto = DadosAeroportoSerializer(required=False)
+    comentario_adicional = ComentarioAdicionalSerializer(required=False)
 
     class Meta:
         model = Viagem
@@ -70,7 +78,8 @@ class ViagemSerializer(serializers.ModelSerializer):
             'retorno',
             'paradas',
             'passageiros',
-            'dados_aeroporto'
+            'dados_aeroporto',
+            'comentario_adicional'
         ]
 
     def create(self, validated_data):
@@ -85,6 +94,7 @@ class ViagemSerializer(serializers.ModelSerializer):
         paradas_data = validated_data.pop('paradas', [])
         passageiros_data = validated_data.pop('passageiros')
         dados_aeroporto_data = validated_data.pop('dados_aeroporto', None)
+        comentario_adicional_data = validated_data.pop('comentario_adicional', None)
 
         # cria a viagem
         viagem = Viagem.objects.create(**validated_data)
@@ -101,7 +111,11 @@ class ViagemSerializer(serializers.ModelSerializer):
         for parada in paradas_data:
             ParadasViagem.objects.create(viagem=viagem, **parada)
 
-        for passageiro in passageiros_data:
-            Passageiro.objects.create(viagem=viagem, **passageiro)
+        if passageiros_data:
+            for passageiro in passageiros_data:
+                Passageiro.objects.create(viagem=viagem, **passageiro)
+
+        if comentario_adicional_data:
+            ComentarioAdicional.objects.create(viagem=viagem, **comentario_adicional_data)
 
         return viagem

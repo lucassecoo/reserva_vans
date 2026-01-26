@@ -64,7 +64,7 @@ class ParadasViagem(models.Model):
     cep_parada = models.CharField(max_length=10)
     rua_parada = models.CharField(max_length=200)
     numero_rua_parada = models.CharField(max_length=10)
-    complemento_parada = models.CharField(max_length=20, blank=True, null=True)
+    complemento_parada = models.CharField(max_length=100, blank=True, null=True)
     cidade_parada = models.CharField(max_length=100)
     uf_parada = models.CharField(max_length=50)
     bairro_parada = models.CharField(max_length=50)
@@ -91,3 +91,11 @@ class DadosAeroporto(models.Model):
     dados_voo = models.CharField(max_length=100, blank=True, null=True)
     horario_chegada_voo = models.TimeField(blank=True, null=True)
     quantidade_malas = models.IntegerField(blank=True, null=True)
+
+class ComentarioAdicional(models.Model):
+    viagem = models.OneToOneField(
+        Viagem,
+        on_delete=models.CASCADE,
+        related_name="comentario_adicional"
+    )
+    comentario = models.TextField(blank=True, null=True)

@@ -6,9 +6,8 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-
+from django.core.mail import EmailMessage
 
 def v(valor):
     """
@@ -252,6 +251,7 @@ def gerar_pdf_viagem(viagem):
                 ["Cidade / UF", f"{v(p.cidade_parada)} / {v(p.uf_parada)}"],
                 ["CEP", v(p.cep_parada)],
                 ["Horário", v(p.horario_parada)],
+                ["Complemento", v(p.complemento_parada)],
             ], colWidths=[140, 340])
 
             tabela_parada.setStyle(TableStyle([
@@ -315,39 +315,63 @@ def gerar_pdf_viagem(viagem):
     # =========================
     # PASSAGEIROS
     # =========================
-    elementos.append(Paragraph("Passageiros", heading_style))
+    elementos.append(Paragraph("Lista de Passageiros", heading_style))
     elementos.append(Spacer(1, 12))
 
-    passageiros_data = [["Nome", "Idade", "RG", "Órgão Emissor"]]
+    qs_passageiros = viagem.passageiros.all()
 
-    for p in viagem.passageiros.all():
-        passageiros_data.append([
-            v(p.nome_passageiro),
-            v(p.idade_passageiro),
-            v(p.rg_passageiro),
-            v(p.orgao_emissor_passageiro),
-        ])
+    if qs_passageiros.exists():
+        passageiros_data = [["Nome", "Idade", "RG", "Órgão Emissor"]]
 
-    tabela_passageiros = Table(passageiros_data, colWidths=[200, 60, 120, 100])
+        for p in qs_passageiros:
+            passageiros_data.append([
+                v(p.nome_passageiro),
+                v(p.idade_passageiro),
+                v(p.rg_passageiro),
+                v(p.orgao_emissor_passageiro),
+            ])
 
-    tabela_passageiros.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor('#2563eb')),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, 0), 11),
-        ("FONTSIZE", (0, 1), (-1, -1), 10),
-        ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor('#374151')),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-        ("TOPPADDING", (0, 0), (-1, -1), 10),
-        ("LEFTPADDING", (0, 0), (-1, -1), 8),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor('#e5e7eb')),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
-    ]))
+        tabela_passageiros = Table(passageiros_data, colWidths=[200, 60, 120, 100])
 
-    elementos.append(tabela_passageiros)
+        tabela_passageiros.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor('#2563eb')),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, 0), 11),
+            ("FONTSIZE", (0, 1), (-1, -1), 10),
+            ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor('#374151')),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 10),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor('#e5e7eb')),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+        ]))
+
+        elementos.append(tabela_passageiros)
+
+    else:
+        texto_aviso = Paragraph("Viagem é dentro de Curitiba", styles['Normal'])
+        elementos.append(texto_aviso)
+
+    elementos.append(Spacer(1, 24))
+
+    # =========================
+    # COMENTARIOS ADICIONAIS
+    # =========================
+    comentario_obj = getattr(viagem, "comentario_adicional", None)
+
+    elementos.append(Paragraph("Comentários", heading_style))
+    elementos.append(Spacer(1, 12))
+
+    if comentario_obj and comentario_obj.comentario:
+        texto_comentarios = comentario_obj.comentario.replace("\n", "<br/>")
+        elementos.append(Paragraph(texto_comentarios, normal_style))
+    else:
+        elementos.append(Paragraph("Sem comentários cadastrados.", normal_style))
+
     elementos.append(Spacer(1, 24))
 
     # =========================
@@ -356,3 +380,129 @@ def gerar_pdf_viagem(viagem):
     doc.build(elementos)
 
     return path
+
+def gerar_pdf_passageiros(viagem):
+    path = os.path.join(
+        settings.MEDIA_ROOT,
+        f"passageiros_{viagem.id}.pdf"
+    )
+
+    styles = getSampleStyleSheet()
+
+    # Modern title style
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontSize=24,
+        textColor=colors.HexColor('#1a1a1a'),
+        spaceAfter=8,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold',
+        leading=28
+    )
+
+    doc = SimpleDocTemplate(
+        path,
+        pagesize=A4,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=50,
+        bottomMargin=50,
+    )
+
+    # Modern heading style
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#2563eb'),
+        spaceBefore=12,
+        spaceAfter=8,
+        fontName='Helvetica-Bold',
+        borderWidth=0,
+        borderColor=colors.HexColor('#2563eb'),
+        borderPadding=0,
+        leftIndent=0,
+        leading=18
+    )
+
+    elementos = []
+
+    elementos.append(
+        Paragraph(
+            f"<b>Lista de passageiros</b><br/><font size='14'>Viagem Nº {viagem.id}</font>",
+            title_style
+        )
+    )
+
+    elementos.append(Paragraph("Lista de Passageiros", heading_style))
+    elementos.append(Spacer(1, 12))
+
+    qs_passageiros = viagem.passageiros.all()
+
+    if qs_passageiros.exists():
+        passageiros_data = [["Nome", "Idade", "RG", "Órgão Emissor"]]
+
+        for p in qs_passageiros:
+            passageiros_data.append([
+                v(p.nome_passageiro),
+                v(p.idade_passageiro),
+                v(p.rg_passageiro),
+                v(p.orgao_emissor_passageiro),
+            ])
+
+        tabela_passageiros = Table(passageiros_data, colWidths=[200, 60, 120, 100])
+
+        tabela_passageiros.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor('#2563eb')),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, 0), 11),
+            ("FONTSIZE", (0, 1), (-1, -1), 10),
+            ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor('#374151')),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 10),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor('#e5e7eb')),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+        ]))
+
+        elementos.append(tabela_passageiros)
+
+    doc.build(elementos)
+
+    return path
+
+def enviar_pdf_por_email(viagem, contratante, email_destino):
+    caminho_passageiros = os.path.join(
+        settings.MEDIA_ROOT,
+        f"passageiros_{viagem.id}.pdf"
+    )
+
+    caminho_viagem = os.path.join(
+        settings.MEDIA_ROOT,
+        f"viagem_{viagem.id}.pdf"
+    )
+
+    email = EmailMessage(
+        subject=f"Dados da viagem {viagem.id} - {contratante.nome_contratante}",
+        body=(
+            "Olá,\n\n"
+            f"Segue em anexo os PDFs com os dados da viagem do contratente {contratante.nome_contratante}.\n\n"
+            "Atenciosamente,\n"
+            "Sistema de Reservas"
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[email_destino],
+    )
+
+    if os.path.exists(caminho_passageiros):
+        email.attach_file(caminho_passageiros)
+
+    if os.path.exists(caminho_viagem):
+        email.attach_file(caminho_viagem)
+
+    email.send(fail_silently=False)

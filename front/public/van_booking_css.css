@@ -140,7 +140,7 @@ input[type="number"],
 select,
 textarea {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1.5px solid #d1ddd4;
+  border: 1.5px solid #bfd4c4;
   background: #ffffff;
   border-radius: 0.5rem;
   font-size: 0.9375rem;
