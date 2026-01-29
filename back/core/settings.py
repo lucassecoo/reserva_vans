@@ -88,17 +88,11 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'formulario_van',
-        'USER': 'postgres',
-        'PASSWORD': '2911',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-                    'client_encoding': 'UTF8',
-                },
-    }
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
 }
 
 
