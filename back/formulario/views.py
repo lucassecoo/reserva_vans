@@ -78,7 +78,7 @@ class CriarViagemView(APIView):
 
         gerar_pdf_viagem(viagem)
 
-        enviar_pdf_por_email(viagem, viagem.contratante, "lucassecoo2911@gmail.com")
+        enviar_pdf_por_email(viagem, viagem.contratante, "contato@acciariturismo.com.br")
 
         return Response(
             {
