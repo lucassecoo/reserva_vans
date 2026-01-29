@@ -8,8 +8,9 @@ let formData = {
   comentarios_adicionais: "",
 };
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
-const API_RESERVAS_ROUTE = "/api/enviar/";
+const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  "https://reservavans-production.up.railway.app";
 
 // Converte o estado do formulário para o formato esperado pelo backend Django
 function buildPayloadForDjango(data) {
@@ -1922,7 +1923,7 @@ async function submitForm(e) {
   submitBtnText && (submitBtnText.style.display = "none");
   submitBtnSpinner && submitBtnSpinner.classList.remove("hidden");
 
-  const url = `${API_BASE}${API_RESERVAS_ROUTE}`;
+  const url = `${API_BASE}`;
   const payload = buildPayloadForDjango(formData);
 
   console.log("Submitting to", url, "payload:", payload);

@@ -28,14 +28,14 @@ SECRET_KEY = 'django-insecure-s60p)%lmo2tb_jcq7nv67t&)qvnns@s2pi8kfls0w^e^gc61&$
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "reserva-vans.vercel.app.com",  # backend no Render
+    "reserva-vans.vercel.app",
     "localhost",
     "127.0.0.1",
 ]
 
 # Domínios confiáveis para CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://reserva-vans.vercel.app/",
+    "https://reserva-vans.vercel.app",
 ]
 
 # Application definition
