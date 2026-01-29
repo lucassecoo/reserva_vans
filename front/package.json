@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "react-scripts start",
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "npx react-scripts build"
   },
   "keywords": [],
   "author": "",
