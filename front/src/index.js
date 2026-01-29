@@ -11,6 +11,7 @@ let formData = {
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "https://reservavans-production.up.railway.app";
+const API_RESERVAS_ROUTE = "/api/enviar/";
 
 // Converte o estado do formulário para o formato esperado pelo backend Django
 function buildPayloadForDjango(data) {
@@ -1923,7 +1924,7 @@ async function submitForm(e) {
   submitBtnText && (submitBtnText.style.display = "none");
   submitBtnSpinner && submitBtnSpinner.classList.remove("hidden");
 
-  const url = `${API_BASE}`;
+  const url = `${API_BASE}${API_RESERVAS_ROUTE}`;
   const payload = buildPayloadForDjango(formData);
 
   console.log("Submitting to", url, "payload:", payload);
