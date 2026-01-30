@@ -520,14 +520,12 @@ def enviar_email_mailgun(destinatario, assunto, corpo, anexos=None):
     return response.json()
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
-    assunto = f"Detalhes da Viagem #{viagem.id}"
+    assunto = f"Detalhes da Viagem #{viagem.id}, {contratante.nome_contratante}"
     corpo = f"""
-    Olá {contratante.nome},
+    Olá,
     
     Segue em anexo os dados da sua viagem.
     
-    Atenciosamente,
-    Acciari Turismo
     """
 
     anexos = []
