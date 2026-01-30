@@ -492,7 +492,7 @@ def enviar_email_smtp(email_destino, assunto, corpo, anexos_paths=[]):
     logger.info(f"Iniciando envio SMTP para {email_destino}...")
 
     msg = EmailMessage()
-    msg["From"] = f"Sistema de Reservas <{EMAIL_REMETENTE}>"
+    msg["From"] = f"Sistema de Reservas <{settings.EMAIL_REMETENTE}>"
     msg["To"] = email_destino
     msg["Subject"] = assunto
     msg.set_content(corpo)
@@ -515,9 +515,9 @@ def enviar_email_smtp(email_destino, assunto, corpo, anexos_paths=[]):
                 logger.error(f"Erro ao anexar {path}: {e}")
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
             server.starttls()
-            server.login(EMAIL_REMETENTE, EMAIL_SENHA)
+            server.login(settings.EMAIL_REMETENTE, settings.EMAIL_SENHA)
             server.send_message(msg)
 
         logger.info("Email enviado com sucesso via SMTP!")
