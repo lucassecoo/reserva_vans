@@ -15,6 +15,7 @@ from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileT
 import base64
 from django.conf import settings
 import resend
+import smtplib
 
 resend.api_key = os.environ.get("RESEND_API_KEY")
 logger = logging.getLogger(__name__)
@@ -487,48 +488,45 @@ def gerar_pdf_passageiros(viagem):
     return path
 
 
-def enviar_email_resend(email_destino, assunto, corpo, anexos_paths=[]):
-    """
-    Envia o e-mail usando a API do Resend.
-    """
-    logger.info(f"Iniciando envio para {email_destino} via Resend...")
+def enviar_email_smtp(email_destino, assunto, corpo, anexos_paths=[]):
+    logger.info(f"Iniciando envio SMTP para {email_destino}...")
 
-    # Estrutura base do e-mail
-    params = {
-        "from": "Reserva Vans <onboarding@resend.dev>",
-        "to": [email_destino],
-        "subject": assunto,
-        "text": corpo,
-        "attachments": []
-    }
+    msg = EmailMessage()
+    msg["From"] = f"Sistema de Reservas <{EMAIL_REMETENTE}>"
+    msg["To"] = email_destino
+    msg["Subject"] = assunto
+    msg.set_content(corpo)
 
-    # Processamento dos anexos
+    # Anexos
     for path in anexos_paths:
         if os.path.exists(path):
             try:
                 with open(path, "rb") as f:
-                    # Lê o arquivo em bytes
-                    content_bytes = f.read()
+                    file_data = f.read()
+                    file_name = os.path.basename(path)
 
-                    params["attachments"].append({
-                        "filename": os.path.basename(path),
-                        "content": list(content_bytes)
-                    })
+                msg.add_attachment(
+                    file_data,
+                    maintype="application",
+                    subtype="pdf",
+                    filename=file_name
+                )
             except Exception as e:
-                print(f"Erro ao ler anexo {path}: {e}")
+                logger.error(f"Erro ao anexar {path}: {e}")
 
     try:
-        email = resend.Emails.send(params)
-        print(f"Email enviado com sucesso! ID: {email.id}")
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(EMAIL_REMETENTE, EMAIL_SENHA)
+            server.send_message(msg)
+
+        logger.info("Email enviado com sucesso via SMTP!")
+
     except Exception as e:
-        print(f"ERRO CRÍTICO ao enviar via Resend: {e}")
+        logger.error(f"ERRO CRÍTICO ao enviar email SMTP: {e}")
 
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
-    """
-    Prepara os caminhos dos arquivos e dispara a thread de envio.
-    """
-
     caminho_passageiros = os.path.join(
         settings.MEDIA_ROOT,
         f"passageiros_{viagem.id}.pdf"
@@ -549,7 +547,6 @@ def enviar_pdf_por_email(viagem, contratante, email_destino):
         "Sistema de Reservas"
     )
 
-    # Verifica quais arquivos realmente existem antes de passar para a função
     anexos = []
     if os.path.exists(caminho_passageiros):
         anexos.append(caminho_passageiros)
@@ -558,10 +555,10 @@ def enviar_pdf_por_email(viagem, contratante, email_destino):
         anexos.append(caminho_viagem)
 
     if not anexos:
-        print("Aviso: Nenhum anexo encontrado para enviar.")
+        logger.warning("Nenhum anexo encontrado para envio.")
 
     email_thread = threading.Thread(
-        target=enviar_email_resend,
+        target=enviar_email_smtp,
         args=(email_destino, assunto, corpo, anexos)
     )
     email_thread.start()
