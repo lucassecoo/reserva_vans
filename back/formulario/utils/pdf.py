@@ -521,18 +521,38 @@ def enviar_email_mailgun(destinatario, assunto, corpo, anexos=None):
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
     assunto = f"Detalhes da Viagem #{viagem.id}, {contratante.nome_contratante}"
-    corpo = f"""
-    Olá,
-    
-    Segue em anexo os dados da sua viagem.
-    
-    """
+
+    corpo = (
+        "Olá,\n\n"
+        "Segue em anexo os dados da sua viagem.\n\n"
+        "Atenciosamente,\n"
+        "Sistema de Reservas"
+    )
 
     anexos = []
 
-    pdf_viagem = viagem.pdf.path
-    with open(pdf_viagem, "rb") as f:
-        anexos.append(("viagem.pdf", f.read()))
+    # PDF da viagem
+    caminho_viagem = os.path.join(
+        settings.MEDIA_ROOT,
+        f"viagem_{viagem.id}.pdf"
+    )
+
+    if os.path.exists(caminho_viagem):
+        with open(caminho_viagem, "rb") as f:
+            anexos.append(("viagem.pdf", f.read()))
+
+    # PDF dos passageiros
+    caminho_passageiros = os.path.join(
+        settings.MEDIA_ROOT,
+        f"passageiros_{viagem.id}.pdf"
+    )
+
+    if os.path.exists(caminho_passageiros):
+        with open(caminho_passageiros, "rb") as f:
+            anexos.append(("passageiros.pdf", f.read()))
+
+    if not anexos:
+        raise Exception("Nenhum PDF encontrado para anexar")
 
     enviar_email_mailgun(
         destinatario=email_destino,
