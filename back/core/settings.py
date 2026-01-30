@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-s60p)%lmo2tb_jcq7nv67t&)qvnns@s2pi8kfls0w^e^gc61&$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "reservavans-production.up.railway.app",
@@ -34,10 +34,15 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
 ]
 
-# Domínios confiáveis para CSRF
+CORS_ALLOWED_ORIGINS = [
+    "https://reserva-vans.vercel.app",
+]
+
 CSRF_TRUSTED_ORIGINS = [
     "https://reserva-vans.vercel.app",
 ]
+
+
 
 # Application definition
 
@@ -63,8 +68,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'core.urls'
 

@@ -7,8 +7,10 @@ from .models import (
     ParadasViagem, Passageiro, DadosAeroporto, ComentarioAdicional
 )
 from .utils.pdf import gerar_pdf_viagem, gerar_pdf_passageiros, enviar_pdf_por_email
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
-
+@method_decorator(csrf_exempt, name="dispatch")
 class CriarViagemView(APIView):
     def post(self, request):
         data = request.data
