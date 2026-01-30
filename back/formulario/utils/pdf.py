@@ -10,6 +10,10 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from django.core.mail import EmailMessage
 import logging
 import threading
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+import base64
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -480,11 +484,34 @@ def gerar_pdf_passageiros(viagem):
 
     return path
 
-def enviar_email_async(email):
+def enviar_email_sendgrid(email_destino, assunto, corpo, anexos_paths=[]):
+    message = Mail(
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to_emails=email_destino,
+        subject=assunto,
+        plain_text_content=corpo
+    )
+
+    # Adiciona todos os anexos
+    for path in anexos_paths:
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                data = f.read()
+                encoded = base64.b64encode(data).decode()
+                attachment = Attachment(
+                    FileContent(encoded),
+                    FileName(os.path.basename(path)),
+                    FileType("application/pdf"),
+                    Disposition("attachment")
+                )
+                message.add_attachment(attachment)
+
     try:
-        email.send(fail_silently=True)
+        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        response = sg.send(message)
+        logger.info(f"Email enviado para {email_destino}, status: {response.status_code}")
     except Exception as e:
-        logger.error(f"Erro ao enviar email: {e}")
+        logger.error(f"Erro ao enviar email via SendGrid: {e}")
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
     caminho_passageiros = os.path.join(
@@ -497,27 +524,23 @@ def enviar_pdf_por_email(viagem, contratante, email_destino):
         f"viagem_{viagem.id}.pdf"
     )
 
-    email = EmailMessage(
-        subject=f"Dados da viagem {viagem.id} - {contratante.nome_contratante}",
-        body=(
-            "Olá,\n\n"
-            f"Segue em anexo os PDFs com os dados da viagem do contratante "
-            f"{contratante.nome_contratante}.\n\n"
-            "Atenciosamente,\n"
-            "Sistema de Reservas"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[email_destino],
+    assunto = f"Dados da viagem {viagem.id} - {contratante.nome_contratante}"
+    corpo = (
+        "Olá,\n\n"
+        f"Segue em anexo os PDFs com os dados da viagem do contratante "
+        f"{contratante.nome_contratante}.\n\n"
+        "Atenciosamente,\n"
+        "Sistema de Reservas"
     )
 
+    anexos = []
     if os.path.exists(caminho_passageiros):
-        email.attach_file(caminho_passageiros)
-
+        anexos.append(caminho_passageiros)
     if os.path.exists(caminho_viagem):
-        email.attach_file(caminho_viagem)
+        anexos.append(caminho_viagem)
 
-    # 🔥 ENVIO ASSÍNCRONO
+    # Envio assíncrono
     threading.Thread(
-        target=enviar_email_async,
-        args=(email,)
+        target=enviar_email_sendgrid,
+        args=(email_destino, assunto, corpo, anexos)
     ).start()
