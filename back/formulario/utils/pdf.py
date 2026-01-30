@@ -14,7 +14,9 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
 import base64
 from django.conf import settings
+import resend
 
+resend.api_key = os.environ.get("RESEND_API_KEY")
 logger = logging.getLogger(__name__)
 
 def v(valor):
@@ -484,36 +486,49 @@ def gerar_pdf_passageiros(viagem):
 
     return path
 
-def enviar_email_sendgrid(email_destino, assunto, corpo, anexos_paths=[]):
-    message = Mail(
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to_emails=email_destino,
-        subject=assunto,
-        plain_text_content=corpo
-    )
 
-    # Adiciona todos os anexos
+def enviar_email_resend(email_destino, assunto, corpo, anexos_paths=[]):
+    """
+    Envia o e-mail usando a API do Resend.
+    """
+    logger.info(f"Iniciando envio para {email_destino} via Resend...")
+
+    # Estrutura base do e-mail
+    params = {
+        "from": "Reserva Vans <onboarding@resend.dev>",
+        "to": [email_destino],
+        "subject": assunto,
+        "text": corpo,
+        "attachments": []
+    }
+
+    # Processamento dos anexos
     for path in anexos_paths:
         if os.path.exists(path):
-            with open(path, "rb") as f:
-                data = f.read()
-                encoded = base64.b64encode(data).decode()
-                attachment = Attachment(
-                    FileContent(encoded),
-                    FileName(os.path.basename(path)),
-                    FileType("application/pdf"),
-                    Disposition("attachment")
-                )
-                message.add_attachment(attachment)
+            try:
+                with open(path, "rb") as f:
+                    # Lê o arquivo em bytes
+                    content_bytes = f.read()
+
+                    params["attachments"].append({
+                        "filename": os.path.basename(path),
+                        "content": list(content_bytes)
+                    })
+            except Exception as e:
+                print(f"Erro ao ler anexo {path}: {e}")
 
     try:
-        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-        response = sg.send(message)
-        logger.info(f"Email enviado para {email_destino}, status: {response.status_code}")
+        email = resend.Emails.send(params)
+        print(f"Email enviado com sucesso! ID: {email.id}")
     except Exception as e:
-        logger.error(f"Erro ao enviar email via SendGrid: {e}")
+        print(f"ERRO CRÍTICO ao enviar via Resend: {e}")
+
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
+    """
+    Prepara os caminhos dos arquivos e dispara a thread de envio.
+    """
+
     caminho_passageiros = os.path.join(
         settings.MEDIA_ROOT,
         f"passageiros_{viagem.id}.pdf"
@@ -525,6 +540,7 @@ def enviar_pdf_por_email(viagem, contratante, email_destino):
     )
 
     assunto = f"Dados da viagem {viagem.id} - {contratante.nome_contratante}"
+
     corpo = (
         "Olá,\n\n"
         f"Segue em anexo os PDFs com os dados da viagem do contratante "
@@ -533,14 +549,19 @@ def enviar_pdf_por_email(viagem, contratante, email_destino):
         "Sistema de Reservas"
     )
 
+    # Verifica quais arquivos realmente existem antes de passar para a função
     anexos = []
     if os.path.exists(caminho_passageiros):
         anexos.append(caminho_passageiros)
+
     if os.path.exists(caminho_viagem):
         anexos.append(caminho_viagem)
 
-    # Envio assíncrono
-    threading.Thread(
-        target=enviar_email_sendgrid,
+    if not anexos:
+        print("Aviso: Nenhum anexo encontrado para enviar.")
+
+    email_thread = threading.Thread(
+        target=enviar_email_resend,
         args=(email_destino, assunto, corpo, anexos)
-    ).start()
+    )
+    email_thread.start()
