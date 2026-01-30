@@ -8,6 +8,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from django.core.mail import EmailMessage
+import logging
+
+logger = logging.getLogger(__name__)
 
 def v(valor):
     """
@@ -477,32 +480,38 @@ def gerar_pdf_passageiros(viagem):
     return path
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
-    caminho_passageiros = os.path.join(
-        settings.MEDIA_ROOT,
-        f"passageiros_{viagem.id}.pdf"
-    )
+    try:
+        caminho_passageiros = os.path.join(
+            settings.MEDIA_ROOT,
+            f"passageiros_{viagem.id}.pdf"
+        )
 
-    caminho_viagem = os.path.join(
-        settings.MEDIA_ROOT,
-        f"viagem_{viagem.id}.pdf"
-    )
+        caminho_viagem = os.path.join(
+            settings.MEDIA_ROOT,
+            f"viagem_{viagem.id}.pdf"
+        )
 
-    email = EmailMessage(
-        subject=f"Dados da viagem {viagem.id} - {contratante.nome_contratante}",
-        body=(
-            "Olá,\n\n"
-            f"Segue em anexo os PDFs com os dados da viagem do contratente {contratante.nome_contratante}.\n\n"
-            "Atenciosamente,\n"
-            "Sistema de Reservas"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[email_destino],
-    )
+        email = EmailMessage(
+            subject=f"Dados da viagem {viagem.id} - {contratante.nome_contratante}",
+            body=(
+                "Olá,\n\n"
+                f"Segue em anexo os PDFs com os dados da viagem do contratante "
+                f"{contratante.nome_contratante}.\n\n"
+                "Atenciosamente,\n"
+                "Sistema de Reservas"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[email_destino],
+        )
 
-    if os.path.exists(caminho_passageiros):
-        email.attach_file(caminho_passageiros)
+        if os.path.exists(caminho_passageiros):
+            email.attach_file(caminho_passageiros)
 
-    if os.path.exists(caminho_viagem):
-        email.attach_file(caminho_viagem)
+        if os.path.exists(caminho_viagem):
+            email.attach_file(caminho_viagem)
 
-    email.send(fail_silently=False)
+        email.send(fail_silently=False)
+
+    except Exception as e:
+        # NÃO quebra a API
+        logger.error(f"Erro ao enviar email da viagem {viagem.id}: {e}")
