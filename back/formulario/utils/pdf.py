@@ -11,8 +11,7 @@ import logging
 import threading
 from django.conf import settings
 import resend
-import smtplib
-from email.message import EmailMessage
+import requests
 
 resend.api_key = os.environ.get("RESEND_API_KEY")
 logger = logging.getLogger(__name__)
@@ -484,78 +483,62 @@ def gerar_pdf_passageiros(viagem):
 
     return path
 
+def enviar_email_mailgun(destinatario, assunto, corpo, anexos=None):
+    """
+    anexos: lista de tuplas -> [("filename.pdf", file_bytes)]
+    """
 
-def enviar_email_smtp(email_destino, assunto, corpo, anexos_paths=[]):
-    logger.info(f"Iniciando envio SMTP para {email_destino}...")
+    domain = os.getenv("MAILGUN_DOMAIN")
+    api_key = os.getenv("MAILGUN_API_KEY")
+    remetente = os.getenv("MAILGUN_FROM")
 
-    msg = EmailMessage()
-    msg["From"] = f"Sistema de Reservas <{settings.EMAIL_REMETENTE}>"
-    msg["To"] = email_destino
-    msg["Subject"] = assunto
-    msg.set_content(corpo)
+    if not domain or not api_key or not remetente:
+        raise Exception("Variáveis do Mailgun não configuradas")
 
-    # Anexos
-    for path in anexos_paths:
-        if os.path.exists(path):
-            try:
-                with open(path, "rb") as f:
-                    file_data = f.read()
-                    file_name = os.path.basename(path)
+    files = []
+    if anexos:
+        for nome, arquivo in anexos:
+            files.append(("attachment", (nome, arquivo)))
 
-                msg.add_attachment(
-                    file_data,
-                    maintype="application",
-                    subtype="pdf",
-                    filename=file_name
-                )
-            except Exception as e:
-                logger.error(f"Erro ao anexar {path}: {e}")
+    response = requests.post(
+        f"https://api.mailgun.net/v3/{domain}/messages",
+        auth=("api", api_key),
+        data={
+            "from": remetente,
+            "to": destinatario,
+            "subject": assunto,
+            "text": corpo,
+        },
+        files=files
+    )
 
-    try:
-        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-            server.starttls()
-            server.login(settings.EMAIL_REMETENTE, settings.EMAIL_SENHA)
-            server.send_message(msg)
+    if response.status_code != 200:
+        raise Exception(
+            f"Erro Mailgun {response.status_code}: {response.text}"
+        )
 
-        logger.info("Email enviado com sucesso via SMTP!")
-
-    except Exception as e:
-        logger.error(f"ERRO CRÍTICO ao enviar email SMTP: {e}")
-
+    return response.json()
 
 def enviar_pdf_por_email(viagem, contratante, email_destino):
-    caminho_passageiros = os.path.join(
-        settings.MEDIA_ROOT,
-        f"passageiros_{viagem.id}.pdf"
-    )
-
-    caminho_viagem = os.path.join(
-        settings.MEDIA_ROOT,
-        f"viagem_{viagem.id}.pdf"
-    )
-
-    assunto = f"Dados da viagem {viagem.id} - {contratante.nome_contratante}"
-
-    corpo = (
-        "Olá,\n\n"
-        f"Segue em anexo os PDFs com os dados da viagem do contratante "
-        f"{contratante.nome_contratante}.\n\n"
-        "Atenciosamente,\n"
-        "Sistema de Reservas"
-    )
+    assunto = f"Detalhes da Viagem #{viagem.id}"
+    corpo = f"""
+    Olá {contratante.nome},
+    
+    Segue em anexo os dados da sua viagem.
+    
+    Atenciosamente,
+    Acciari Turismo
+    """
 
     anexos = []
-    if os.path.exists(caminho_passageiros):
-        anexos.append(caminho_passageiros)
 
-    if os.path.exists(caminho_viagem):
-        anexos.append(caminho_viagem)
+    pdf_viagem = viagem.pdf.path
+    with open(pdf_viagem, "rb") as f:
+        anexos.append(("viagem.pdf", f.read()))
 
-    if not anexos:
-        logger.warning("Nenhum anexo encontrado para envio.")
-
-    email_thread = threading.Thread(
-        target=enviar_email_smtp,
-        args=(email_destino, assunto, corpo, anexos)
+    enviar_email_mailgun(
+        destinatario=email_destino,
+        assunto=assunto,
+        corpo=corpo,
+        anexos=anexos
     )
-    email_thread.start()
