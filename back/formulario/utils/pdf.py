@@ -1,5 +1,4 @@
 import os
-from django.conf import settings
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 )
@@ -10,12 +9,10 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from django.core.mail import EmailMessage
 import logging
 import threading
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
-import base64
 from django.conf import settings
 import resend
 import smtplib
+from email.message import EmailMessage
 
 resend.api_key = os.environ.get("RESEND_API_KEY")
 logger = logging.getLogger(__name__)
