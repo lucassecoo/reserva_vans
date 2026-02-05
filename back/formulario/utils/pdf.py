@@ -6,9 +6,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from django.core.mail import EmailMessage
 import logging
-import threading
 from django.conf import settings
 import resend
 import requests

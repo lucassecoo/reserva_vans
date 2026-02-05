@@ -46,7 +46,7 @@ class ComentarioAdicionalInline(admin.StackedInline):
 
 @admin.register(Viagem)
 class ViagemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nome_contratante', 'cidade_destino', 'criado_em')
+    list_display = ('id', 'criado_em')
     ordering = ('-criado_em',)
     inlines = [
         ContratanteInline,
@@ -58,14 +58,6 @@ class ViagemAdmin(admin.ModelAdmin):
         DadosAeroportoInline,
         ComentarioAdicionalInline,
     ]
-
-    def nome_contratante(self, obj):
-        return obj.contratante.nome_contratante if hasattr(obj, 'contratante') else '-'
-    nome_contratante.short_description = 'Contratante'
-
-    def cidade_destino(self, obj):
-        return obj.destino.cidade_destino if hasattr(obj, 'destino') else '-'
-    cidade_destino.short_description = 'Destino'
 
 @admin.register(Contratante)
 class ContratanteAdmin(admin.ModelAdmin):

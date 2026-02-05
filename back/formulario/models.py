@@ -20,7 +20,7 @@ class Contratante(models.Model):
     telefone_contratante = models.CharField(max_length=20)
     orgao_emissor_contratante = models.CharField(max_length=50)
     cpf_cnpj_contratante = models.CharField(max_length=20)
-    cep_contratante = models.CharField(max_length=10)
+    cep_contratante = models.CharField(max_length=10, blank=True, null=True)
     rua_contratante = models.CharField(max_length=100)
     numero_rua_contratante = models.CharField(max_length=10)
     complemento_contratante = models.CharField(max_length=100, blank=True, null=True)
@@ -30,7 +30,7 @@ class Contratante(models.Model):
 
 class OrigemViagem(models.Model):
     viagem = models.OneToOneField(Viagem, on_delete=models.CASCADE, related_name="origem")
-    cep_origem = models.CharField(max_length=10)
+    cep_origem = models.CharField(max_length=10, blank=True, null=True)
     rua_origem = models.CharField(max_length=200)
     numero_rua_origem = models.CharField(max_length=10)
     complemento_origem = models.CharField(max_length=200, blank=True, null=True)
@@ -42,7 +42,7 @@ class OrigemViagem(models.Model):
 
 class DestinoViagem(models.Model):
     viagem = models.OneToOneField(Viagem, on_delete=models.CASCADE, related_name="destino")
-    cep_destino = models.CharField(max_length=10)
+    cep_destino = models.CharField(max_length=10, blank=True, null=True)
     rua_destino = models.CharField(max_length=200)
     numero_rua_destino = models.CharField(max_length=10)
     complemento_destino = models.CharField(max_length=200, blank=True, null=True)
@@ -61,7 +61,7 @@ class ParadasViagem(models.Model):
         on_delete=models.CASCADE,
         related_name="paradas"
     )
-    cep_parada = models.CharField(max_length=10)
+    cep_parada = models.CharField(max_length=10, blank=True, null=True)
     rua_parada = models.CharField(max_length=200)
     numero_rua_parada = models.CharField(max_length=10)
     complemento_parada = models.CharField(max_length=100, blank=True, null=True)

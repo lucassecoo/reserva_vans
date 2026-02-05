@@ -8,9 +8,7 @@ let formData = {
   comentarios_adicionais: "",
 };
 
-const API_BASE =
-  process.env.REACT_APP_API_BASE ||
-  "https://reservavans-production.up.railway.app";
+const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
 const API_RESERVAS_ROUTE = "/api/enviar/";
 
 // Converte o estado do formulário para o formato esperado pelo backend Django
@@ -210,6 +208,70 @@ function setupEventListeners() {
       "change",
       handleDestinoAeroportoChange,
     );
+  }
+
+  // Checkboxes 'Endereço não possui CEP'
+  const noCepContratante = document.getElementById("noCepContratante");
+  if (noCepContratante) {
+    noCepContratante.addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      const cepEl = document.getElementById("cepContratante");
+      if (cepEl) {
+        cepEl.disabled = checked;
+        const buscarBtn = document.getElementById("buscarCepContratante");
+        if (buscarBtn) buscarBtn.disabled = checked;
+        if (checked) {
+          cepEl.value = "";
+          clearError("cepContratante");
+        }
+      }
+    });
+    if (noCepContratante.checked) {
+      const cepEl = document.getElementById("cepContratante");
+      if (cepEl) cepEl.disabled = true;
+    }
+  }
+
+  const noCepSaida = document.getElementById("noCepSaida");
+  if (noCepSaida) {
+    noCepSaida.addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      const cepEl = document.getElementById("cepSaida");
+      if (cepEl) {
+        cepEl.disabled = checked;
+        const buscarBtn = document.getElementById("buscarCepSaida");
+        if (buscarBtn) buscarBtn.disabled = checked;
+        if (checked) {
+          cepEl.value = "";
+          clearError("cepSaida");
+        }
+      }
+    });
+    if (noCepSaida.checked) {
+      const cepEl = document.getElementById("cepSaida");
+      if (cepEl) cepEl.disabled = true;
+    }
+  }
+
+  const noCepChegada = document.getElementById("noCepChegada");
+  if (noCepChegada) {
+    noCepChegada.addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      const cepEl = document.getElementById("cepChegada");
+      if (cepEl) {
+        cepEl.disabled = checked;
+        const buscarBtn = document.getElementById("buscarCepChegada");
+        if (buscarBtn) buscarBtn.disabled = checked;
+        if (checked) {
+          cepEl.value = "";
+          clearError("cepChegada");
+        }
+      }
+    });
+    if (noCepChegada.checked) {
+      const cepEl = document.getElementById("cepChegada");
+      if (cepEl) cepEl.disabled = true;
+    }
   }
 
   // Step 3: Passageiros
@@ -617,8 +679,8 @@ function validateStep1() {
     isValid = false;
   }
 
-  // Endereço
-  const enderecoFields = ["cep", "rua", "numero", "bairro", "cidade", "estado"];
+  // Endereço (CEP obrigatório por padrão, mas pode ser marcado como 'não possui CEP')
+  const enderecoFields = ["rua", "numero", "bairro", "cidade", "estado"];
   enderecoFields.forEach((field) => {
     const value = document.getElementById(`${field}Contratante`).value.trim();
     if (!value) {
@@ -626,6 +688,15 @@ function validateStep1() {
       isValid = false;
     }
   });
+
+  const noCepContr = (
+    document.getElementById("noCepContratante") || { checked: false }
+  ).checked;
+  const cepContr = document.getElementById("cepContratante").value.trim();
+  if (!noCepContr && !cepContr) {
+    showError("cepContratante", "CEP é obrigatório");
+    isValid = false;
+  }
 
   // Validar UF (2 letras)
   const uf = document.getElementById("estadoContratante").value.trim();
@@ -656,7 +727,6 @@ function validateStep2() {
 
   // Endereço de saída
   const saidaFields = [
-    "cepSaida",
     "ruaSaida",
     "numeroSaida",
     "bairroSaida",
@@ -713,7 +783,6 @@ function validateStep2() {
 
   // Endereço de chegada
   const chegadaFields = [
-    "cepChegada",
     "ruaChegada",
     "numeroChegada",
     "bairroChegada",
@@ -728,9 +797,33 @@ function validateStep2() {
     }
   });
 
-  // Origem e destino não podem ser o mesmo local (comparação por CEP quando disponível, senão por endereço completo)
+  // CEP obrigatório por padrão, exceto quando é aeroporto ou marcado como 'não possui CEP'
+  const origemEhAeroporto = (
+    document.getElementById("origemEhAeroporto") || { checked: false }
+  ).checked;
+  const noCepSaidaChecked = (
+    document.getElementById("noCepSaida") || { checked: false }
+  ).checked;
   const cepSaida = document.getElementById("cepSaida").value.trim();
+  if (!origemEhAeroporto && !noCepSaidaChecked && !cepSaida) {
+    showError("cepSaida", "CEP é obrigatório");
+    isValid = false;
+  }
+
+  const destinoEhAeroporto = (
+    document.getElementById("destinoEhAeroporto") || { checked: false }
+  ).checked;
+  const noCepChegadaChecked = (
+    document.getElementById("noCepChegada") || { checked: false }
+  ).checked;
   const cepChegada = document.getElementById("cepChegada").value.trim();
+  if (!destinoEhAeroporto && !noCepChegadaChecked && !cepChegada) {
+    showError("cepChegada", "CEP é obrigatório");
+    isValid = false;
+  }
+
+  // Origem e destino não podem ser o mesmo local (comparação por CEP quando disponível, senão por endereço completo)
+  // usa `cepSaida`/`cepChegada` já obtidos acima
 
   const normalize = (s) => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
 

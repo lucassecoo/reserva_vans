@@ -16,18 +16,27 @@ class ContratanteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contratante
         exclude = ['id']
+        extra_kwargs = {
+            'cep_contratante': {'required': False, 'allow_blank': True, 'allow_null': True},
+        }
 
 
 class OrigemViagemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrigemViagem
         exclude = ['id']
+        extra_kwargs = {
+            'cep_origem': {'required': False, 'allow_blank': True, 'allow_null': True},
+        }
 
 
 class DestinoViagemSerializer(serializers.ModelSerializer):
     class Meta:
         model = DestinoViagem
         exclude = ['id']
+        extra_kwargs = {
+            'cep_destino': {'required': False, 'allow_blank': True, 'allow_null': True},
+        }
 
 
 class RetornoViagemSerializer(serializers.ModelSerializer):
@@ -40,6 +49,9 @@ class ParadasViagemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParadasViagem
         exclude = ['id', 'viagem']
+        extra_kwargs = {
+            'cep_parada': {'required': False, 'allow_blank': True, 'allow_null': True},
+        }
 
 
 class PassageiroSerializer(serializers.ModelSerializer):
