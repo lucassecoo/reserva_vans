@@ -8,7 +8,7 @@ let formData = {
   comentarios_adicionais: "",
 };
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
+const API_BASE = "https://reservavans-production.up.railway.app";
 const API_RESERVAS_ROUTE = "/api/enviar/";
 
 // Converte o estado do formulário para o formato esperado pelo backend Django
