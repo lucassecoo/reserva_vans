@@ -21,16 +21,41 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://reserva-vans.vercel.app",
-]
-
 CSRF_TRUSTED_ORIGINS = [
     "https://reserva-vans.vercel.app",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://reserva-vans.vercel.app",
+]
 
+CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ]
+}
+
+CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
 INSTALLED_APPS = [
