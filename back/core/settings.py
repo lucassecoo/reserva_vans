@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://reserva-vans.vercel.app",
+    "https://*.vercel.app",
 ]
 
 CORS_ALLOWED_ORIGINS = [

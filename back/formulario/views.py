@@ -10,6 +10,7 @@ from .utils.pdf import gerar_pdf_viagem, gerar_pdf_passageiros, enviar_pdf_por_e
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+@method_decorator(csrf_exempt, name="dispatch")
 class CriarViagemView(APIView):
     def post(self, request):
         try:
