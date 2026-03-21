@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-s60p)%lmo2tb_jcq7nv67t&)qvnns@s2pi8kfls0w^e^gc61&$
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "reservavans-production.up.railway.app",
+    "back-twilight-waterfall-769.fly.dev",
     "reserva-vans.vercel.app",
     "localhost",
     "127.0.0.1",
@@ -76,7 +76,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
