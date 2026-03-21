@@ -1558,8 +1558,8 @@ function collectParadas() {
 
 // ==================== PASSAGEIROS ====================
 function addPassageiro() {
-  if (passageiroCount >= 50) {
-    showError("passageiros", "Máximo de 50 passageiros permitido");
+  if (passageiroCount >= 120) {
+    showError("passageiros", "Máximo de 120 passageiros permitido");
     return;
   }
 
