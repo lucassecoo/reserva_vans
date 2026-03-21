@@ -8,7 +8,7 @@ let formData = {
   comentarios_adicionais: "",
 };
 
-const API_BASE = "https://reservavans-production.up.railway.app";
+const API_BASE = "https://back-twilight-waterfall-769.fly.dev";
 const API_RESERVAS_ROUTE = "/api/enviar/";
 
 // Converte o estado do formulário para o formato esperado pelo backend Django
